@@ -130,6 +130,11 @@ void sd_set_auth(c_shared_data data, const char* auth)
     data->auth = str;
 }
 
+char* sd_get_auth(c_shared_data data)
+{
+    return cpp_str_to_c(data->auth);
+}
+
 int sd_has_front_read(c_shared_data data)
 {
     return data->has_front_read();

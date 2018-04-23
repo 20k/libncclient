@@ -11,6 +11,7 @@ extern "C"
     void sd_destroy(c_shared_data data);
 
     void sd_set_auth(c_shared_data data, const char* auth);
+    char* sd_get_auth(c_shared_data data);
 
     int sd_has_front_read(c_shared_data data);
     int sd_has_front_write(c_shared_data data);
