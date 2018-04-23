@@ -299,3 +299,8 @@ char* sa_server_scriptargs_invalid_to_script_name(server_command_info info)
 
     return cpp_str_to_c(str);
 }
+
+char* sa_server_scriptargs_ratelimit_to_script_name(server_command_info info)
+{
+    return cpp_str_to_c(info.data);
+}

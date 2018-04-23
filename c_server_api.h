@@ -65,6 +65,7 @@ extern "C"
 
     ///may return nullptr
     char* sa_server_scriptargs_invalid_to_script_name(server_command_info info);
+    char* sa_server_scriptargs_ratelimit_to_script_name(server_command_info info);
 }
 
 #endif // C_SERVER_API_H_INCLUDED
