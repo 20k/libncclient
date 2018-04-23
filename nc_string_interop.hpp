@@ -6,6 +6,9 @@
 inline
 std::string c_str_consume(char* c)
 {
+    if(c == nullptr)
+        return std::string();
+
     std::string ret(c);
 
     free_string(c);

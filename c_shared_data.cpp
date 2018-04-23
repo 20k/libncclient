@@ -195,5 +195,8 @@ int sd_get_termination_count(c_shared_data data)
 
 void free_string(char* c)
 {
+    if(c == nullptr)
+        return;
+
     delete [] c;
 }

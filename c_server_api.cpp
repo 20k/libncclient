@@ -205,7 +205,9 @@ void sa_destroy_script_argument_list(script_argument_list argl)
     }
 
     free_string(argl.scriptname);
-    delete [] argl.args;
+
+    if(argl.args != nullptr)
+        delete [] argl.args;
 }
 
 script_argument_list sa_server_scriptargs_to_list(server_command_info info)
@@ -241,7 +243,7 @@ script_argument_list sa_server_scriptargs_to_list(server_command_info info)
     }
 
     if(strings.size() == 0)
-        return {nullptr, 0};
+        return {nullptr, nullptr, 0};
 
     std::string scriptname = strings[0];
 
@@ -250,7 +252,7 @@ script_argument_list sa_server_scriptargs_to_list(server_command_info info)
     std::vector<std::pair<std::string, std::string>> args;
 
     if((strings.size() % 2) != 0)
-        return {nullptr, 0};
+        return {nullptr, nullptr, 0};
 
     for(int i=0; i < (int)strings.size(); i+=2)
     {
