@@ -38,7 +38,16 @@ extern "C"
         int length;
     };
 
-    void sa_destroy_server_command_info(server_command_info info);
+    struct chat_api_info
+    {
+        char* channels;
+        char* msgs;
+
+        int num_channels_and_msgs;
+
+        char* in_channels;
+        int num_in_channels;
+    };
 
     struct script_argument
     {
@@ -53,13 +62,16 @@ extern "C"
         int num;
     };
 
+    void sa_destroy_server_command_info(server_command_info info);
+    void sa_destroy_chat_api_info(chat_api_info info);
     void sa_destroy_script_argument_list(script_argument_list argl);
 
     server_command_info sa_server_response_to_info(const char* server_response, int response_length);
-
     ///chat api is the most complex result to parse
     ///so skip that for the moment
     char* sa_command_to_human_readable(server_command_info info);
+
+    chat_api_info sa_chat_api_to_info(server_command_info info);
 
     script_argument_list sa_server_scriptargs_to_list(server_command_info info);
 
