@@ -31,6 +31,16 @@ void write_all_bin(const std::string& fname, const std::string& str)
 }
 
 inline
+std::string read_file_bin(const std::string& file)
+{
+    std::ifstream t(file, std::ios::binary);
+    std::string str((std::istreambuf_iterator<char>(t)),
+                     std::istreambuf_iterator<char>());
+
+    return str;
+}
+
+inline
 bool file_exists(const std::string& name)
 {
     std::ifstream f(name.c_str());
