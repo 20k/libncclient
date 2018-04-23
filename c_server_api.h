@@ -20,6 +20,47 @@ extern "C"
 
     void sa_do_poll_server(c_shared_data data);
     void sa_do_autocomplete_request(c_shared_data data, const char* scriptname);
+
+    enum server_command_type
+    {
+        server_command_command,
+        server_command_chat_api,
+        server_command_server_scriptargs,
+        server_command_server_scriptargs_invalid,
+        server_command_server_scriptargs_ratelimit,
+        error_invalid_response,
+    };
+
+    struct server_command_info
+    {
+        server_command_type type;
+        char* data;
+        int length;
+    };
+
+    void sa_destroy_server_command_info(server_command_info info);
+
+    struct script_argument
+    {
+        char* key;
+        char* val;
+    };
+
+    struct script_argument_list
+    {
+        script_argument* args;
+        int num;
+    };
+
+    void sa_destroy_script_argument_list(script_argument_list argl);
+
+    server_command_info sa_server_response_to_info(const char* server_response, int response_length);
+
+    ///chat api is the most complex result to parse
+    ///so skip that for the moment
+    char* sa_command_to_human_readable(server_command_info info);
+
+    script_argument_list sa_server_scriptargs_to_list(server_command_info info);
 }
 
 #endif // C_SERVER_API_H_INCLUDED

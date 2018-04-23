@@ -281,4 +281,13 @@ std::string c_str_to_cpp(const char* in)
     return std::string(in);
 }
 
+inline
+std::string c_str_to_cpp(const char* in, int len)
+{
+    if(in == nullptr)
+        return std::string();
+
+    return std::string(in, len);
+}
+
 #endif // NC_UTIL_HPP_INCLUDED

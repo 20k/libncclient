@@ -40,6 +40,9 @@
 				</ExtraCommands>
 			</Target>
 		</Build>
+		<Compiler>
+			<Add option="-std=c++17" />
+		</Compiler>
 		<Linker>
 			<Add option="-lsfml-system" />
 			<Add option="-lws2_32" />
@@ -49,6 +52,8 @@
 		</Linker>
 		<Unit filename="c_net_client.cpp" />
 		<Unit filename="c_net_client.h" />
+		<Unit filename="c_server_api.cpp" />
+		<Unit filename="c_server_api.h" />
 		<Unit filename="c_shared_data.cpp" />
 		<Unit filename="c_shared_data.h" />
 		<Unit filename="nc_util.hpp" />
