@@ -2,10 +2,9 @@
 #define NC_UTIL_HPP_INCLUDED
 
 #include <string>
+#include <vector>
 #include <sstream>
 #include <fstream>
-#include <vector>
-#include <algorithm>
 
 inline
 std::string read_file(const std::string& file)
@@ -32,20 +31,29 @@ void write_all_bin(const std::string& fname, const std::string& str)
 }
 
 inline
-std::string read_file_bin(const std::string& file)
-{
-    std::ifstream t(file, std::ios::binary);
-    std::string str((std::istreambuf_iterator<char>(t)),
-                     std::istreambuf_iterator<char>());
-
-    return str;
-}
-
-inline
-bool file_exists(const std::string& name)
+bool file_exists (const std::string& name)
 {
     std::ifstream f(name.c_str());
     return f.good();
+}
+
+inline
+std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems)
+{
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+inline
+std::vector<std::string> split(const std::string &s, char delim)
+{
+    std::vector<std::string> elems;
+    split(s, delim, elems);
+    return elems;
 }
 
 inline
@@ -80,6 +88,16 @@ bool starts_with(const T& in, const std::string& test)
     return false;
 }
 
+///ALARM: NEED TO ENFORCE LOWERCASE!!!
+inline
+bool is_valid_name_character(char c, bool allow_uppercase = false)
+{
+    if(allow_uppercase)
+        return isalnum(c) || c == '_';
+    else
+        return (isdigit(c) || (isalnum(c) && islower(c))) || c == '_';
+}
+
 ///i think something is broken with 7.2s stringstream implementation
 ///i dont know why the stringstream version crashes
 inline
@@ -102,13 +120,7 @@ std::vector<std::string> no_ss_split(const std::string& str, const std::string& 
 #define MAX_ANY_NAME_LEN 24
 
 inline
-bool is_valid_name_character(char c)
-{
-    return isalnum(c) || c == '_';
-}
-
-inline
-bool is_valid_string(const std::string& to_parse)
+bool is_valid_string(const std::string& to_parse, bool allow_uppercase = false)
 {
     if(to_parse.size() >= MAX_ANY_NAME_LEN)
         return false;
@@ -127,7 +139,7 @@ bool is_valid_string(const std::string& to_parse)
 
         check_digit = false;
 
-        if(!is_valid_name_character(c))
+        if(!is_valid_name_character(c, allow_uppercase))
         {
             return false;
         }
@@ -155,9 +167,10 @@ bool is_valid_full_name_string(const std::string& name)
     if(strings.size() != 2)
         return false;
 
-    for(auto& str : strings)
+    //for(auto& str : strings)
+    for(int i=0; i < (int)strings.size(); i++)
     {
-        if(!is_valid_string(str))
+        if(!is_valid_string(strings[i], i == 1))
             return false;
     }
 
