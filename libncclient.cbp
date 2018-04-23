@@ -53,6 +53,7 @@
 		<Unit filename="c_shared_data.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="nc_util.hpp" />
+		<Unit filename="socket.hpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />
