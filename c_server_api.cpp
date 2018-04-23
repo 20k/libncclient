@@ -85,16 +85,14 @@ char* sa_default_up_handling(const char* for_user, const char* server_msg, const
 
     std::vector<std::string> strings = no_ss_split(unknown_command, " ");
 
-    if((starts_with(unknown_command, up) || starts_with(unknown_command, dry)) && strings.size() == 3)
+    if((starts_with(unknown_command, up) || starts_with(unknown_command, dry)) && strings.size() == 2)
     {
-        std::string name = strings[2];
+        std::string name = strings[1];
 
         std::string hardcoded_user(for_user);
 
         std::string diskname = sdir + hardcoded_user + "." + name + ".es5.js";
         std::string diskname_es6 = sdir + hardcoded_user + "." + name + ".js";
-
-        std::cout << "looking for " << diskname_es6 << std::endl;
 
         std::string comm = up;
 
