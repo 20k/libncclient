@@ -1,6 +1,8 @@
 #include "c_server_api.h"
 #include "nc_util.hpp"
 
+#include <iostream>
+
 char* sa_make_chat_command(const char* chat_channel, const char* chat_msg)
 {
     std::string s1 = c_str_to_cpp(chat_channel);
@@ -91,6 +93,8 @@ char* sa_default_up_handling(const char* for_user, const char* server_msg, const
 
         std::string diskname = sdir + hardcoded_user + "." + name + ".es5.js";
         std::string diskname_es6 = sdir + hardcoded_user + "." + name + ".js";
+
+        std::cout << "looking for " << diskname_es6 << std::endl;
 
         std::string comm = up;
 
