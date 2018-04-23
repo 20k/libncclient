@@ -186,6 +186,11 @@ void sd_set_termination(c_shared_data data)
     data->should_terminate = true;
 }
 
+int sd_should_terminate(c_shared_data data)
+{
+    return data->should_terminate;
+}
+
 void free_string(char* c)
 {
     delete [] c;

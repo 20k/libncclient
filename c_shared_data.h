@@ -25,6 +25,7 @@ extern "C"
     char* sd_get_user(c_shared_data data);
 
     void sd_set_termination(c_shared_data data);
+    int sd_should_terminate(c_shared_data data);
 
     void free_string(char*);
 }
