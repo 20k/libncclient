@@ -212,12 +212,15 @@ void sa_destroy_script_argument_list(script_argument_list argl)
 
 script_argument_list sa_server_scriptargs_to_list(server_command_info info)
 {
+    if(info.length == 0)
+        return {nullptr, nullptr, 0};
+
     std::string in(info.data, info.length);
 
     ///TODO: Make all server/client communication use this format
     std::string_view view(&in[0]);
 
-    view.remove_prefix(std::min(view.find_first_of(" ")+1, view.size()));
+    //view.remove_prefix(std::min(view.find_first_of(" ")+1, view.size()));
 
     std::vector<std::string> strings;
 
