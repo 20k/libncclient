@@ -1,5 +1,5 @@
-#ifndef UTIL_HPP_INCLUDED
-#define UTIL_HPP_INCLUDED
+#ifndef NC_UTIL_HPP_INCLUDED
+#define NC_UTIL_HPP_INCLUDED
 
 #include <string>
 #include <sstream>
@@ -99,4 +99,4 @@ std::vector<std::string> no_ss_split(const std::string& str, const std::string& 
 }
 
 
-#endif // UTIL_HPP_INCLUDED
+#endif // NC_UTIL_HPP_INCLUDED

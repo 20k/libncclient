@@ -1,5 +1,5 @@
 #include "c_net_client.h"
-#include "util.hpp"
+#include "nc_util.hpp"
 #include "socket.hpp"
 
 //#include <crapmud/socket_shared.hpp>
