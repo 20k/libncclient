@@ -120,7 +120,7 @@ void sd_destroy(c_shared_data data)
         delete data;
 }
 
-void sd_set_auth(c_shared_data data, char* auth)
+void sd_set_auth(c_shared_data data, const char* auth)
 {
     if(auth == nullptr)
         return;
@@ -150,7 +150,7 @@ char* sd_get_front_write(c_shared_data data)
     return cpp_str_to_c(data->get_front_write());
 }
 
-void sd_add_back_write(c_shared_data data, char* write)
+void sd_add_back_write(c_shared_data data, const char* write)
 {
     if(write == nullptr)
         return;
@@ -159,7 +159,7 @@ void sd_add_back_write(c_shared_data data, char* write)
 
     return data->add_back_write(str);
 }
-void sd_add_back_read(c_shared_data data, char* read)
+void sd_add_back_read(c_shared_data data, const char* read)
 {
     if(read == nullptr)
         return;
@@ -169,7 +169,7 @@ void sd_add_back_read(c_shared_data data, char* read)
     return data->add_back_read(str);
 }
 
-void sd_set_user(c_shared_data data, char* user)
+void sd_set_user(c_shared_data data, const char* user)
 {
     std::string str(user);
 
