@@ -5,6 +5,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
 inline
 std::string read_file(const std::string& file)
@@ -98,5 +99,138 @@ std::vector<std::string> no_ss_split(const std::string& str, const std::string& 
     return tokens;
 }
 
+#define MAX_ANY_NAME_LEN 24
+
+inline
+bool is_valid_name_character(char c)
+{
+    return isalnum(c) || c == '_';
+}
+
+inline
+bool is_valid_string(const std::string& to_parse)
+{
+    if(to_parse.size() >= MAX_ANY_NAME_LEN)
+        return false;
+
+    if(to_parse.size() == 0)
+        return false;
+
+    bool check_digit = true;
+
+    for(char c : to_parse)
+    {
+        if(check_digit && isdigit(c))
+        {
+            return false;
+        }
+
+        check_digit = false;
+
+        if(!is_valid_name_character(c))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+inline
+bool is_valid_full_name_string(const std::string& name)
+{
+    //std::string to_parse = strip_whitespace(name);
+
+    std::string to_parse = name;
+
+    int num_dots = std::count(to_parse.begin(), to_parse.end(), '.');
+
+    if(num_dots != 1)
+    {
+        return false;
+    }
+
+    std::vector<std::string> strings = no_ss_split(to_parse, ".");
+
+    if(strings.size() != 2)
+        return false;
+
+    for(auto& str : strings)
+    {
+        if(!is_valid_string(str))
+            return false;
+    }
+
+    return true;
+}
+
+inline
+std::string get_script_from_name_string(const std::string& base_dir, const std::string& name_string)
+{
+    bool is_valid = is_valid_full_name_string(name_string);
+
+    if(!is_valid)
+        return "";
+
+    std::string to_parse = strip_whitespace(name_string);
+
+    std::replace(to_parse.begin(), to_parse.end(), '.', '/');
+
+    std::string file = base_dir + "/" + to_parse + ".js";
+
+    if(!file_exists(file))
+    {
+        return "";
+    }
+
+    return read_file(file);
+}
+
+inline
+std::string make_error_col(const std::string& in)
+{
+    return "`D" + in + "`";
+}
+
+inline
+std::string make_success_col(const std::string& in)
+{
+    return "`L" + in + "`";
+}
+
+inline
+std::string string_to_colour(const std::string& in)
+{
+    if(in == "core")
+        return "L";
+
+    if(in == "extern")
+        return "H";
+
+    std::string valid_cols = "ABCDEFGHIJKLNOPSTVWXYdefghijlnpqsw";
+
+    size_t hsh = std::hash<std::string>{}(in);
+
+    return std::string(1, valid_cols[(hsh % valid_cols.size())]);
+}
+
+inline
+std::string colour_string(const std::string& in)
+{
+    std::string c = string_to_colour(in);
+
+    return "`" + c + in + "`";
+}
+
+inline
+std::string get_host_from_fullname(const std::string& in)
+{
+    auto found = no_ss_split(in, ".");
+
+    if(found.size() < 1)
+        return "";
+
+    return found[0];
+}
 
 #endif // NC_UTIL_HPP_INCLUDED
