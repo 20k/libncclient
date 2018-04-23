@@ -76,16 +76,21 @@ extern "C"
     void sa_destroy_script_argument_list(script_argument_list argl);
 
     server_command_info sa_server_response_to_info(const char* server_response, int response_length);
-    ///chat api is the most complex result to parse
-    ///so skip that for the moment
+
+    ///server_command_command
     char* sa_command_to_human_readable(server_command_info info);
 
+    ///server_command_chat_api
     chat_api_info sa_chat_api_to_info(server_command_info info);
 
+    ///server_command_server_scriptargs
     script_argument_list sa_server_scriptargs_to_list(server_command_info info);
 
     ///may return nullptr
+    ///server_command_server_scriptargs_invalid
     char* sa_server_scriptargs_invalid_to_script_name(server_command_info info);
+
+    ///server_command_server_scriptargs_ratelimit
     char* sa_server_scriptargs_ratelimit_to_script_name(server_command_info info);
 }
 
