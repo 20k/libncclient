@@ -196,6 +196,153 @@ char* sa_command_to_human_readable(server_command_info info)
     return cpp_str_to_c(cp.c_str());
 }
 
+chat_api_info sa_chat_api_to_info(server_command_info info)
+{
+    if(info.data == nullptr || info.length == 0)
+        return {};
+
+    std::string chat_in(info.data, info.length);
+
+    auto post_intro = chat_in.begin();
+
+    auto strs = no_ss_split(chat_in, " ");
+
+    if(strs.size() < 2)
+        return {};
+
+    std::vector<std::string> channels;
+    std::vector<std::string> msgs;
+    std::vector<std::string> in_channels;
+
+    std::string prologue_size = strs[0];
+    std::string num_channels = strs[1];
+
+    int num = atoi(num_channels.c_str());
+    int prologue_bytes = atoi(prologue_size.c_str());
+
+    int base = 2;
+
+    for(int i=0; i < num; i++)
+    {
+        int offset = i + base;
+
+        std::string user_is_in_chan = strs[offset];
+
+        in_channels.push_back(user_is_in_chan);
+
+        //std::cout << user_is_in_chan << " fchan " << std::endl;
+    }
+
+    std::string remaining(post_intro + prologue_bytes + prologue_size.size() + 1, chat_in.end());
+
+    if(remaining.size() > 0 && remaining.front() == ' ')
+        remaining.erase(remaining.begin());
+
+    while(1)
+    {
+        //std::cout << "rem " << remaining << std::endl;
+
+        auto bytes_check = no_ss_split(remaining, " ");
+
+        if(bytes_check.size() == 0)
+            break;
+
+        int next_size = atoi(bytes_check[0].c_str());
+
+        auto it = remaining.begin();
+
+        while(*it != ' ')
+            it++;
+
+        it++;
+
+        if(next_size == 0)
+        {
+            it++;
+
+            if(it >= remaining.end())
+                break;
+
+            remaining = std::string(it, remaining.end());
+
+            continue;
+        }
+
+        std::string total_msg(it, it + next_size);
+
+        auto next_it = it;
+
+        while(*next_it != ' ')
+            next_it++;
+
+        std::string chan(it, next_it);
+
+        next_it++;
+
+        std::string msg(next_it, it + next_size);
+
+        channels.push_back(chan);
+        msgs.push_back(msg);
+
+        if(it + next_size >= remaining.end())
+            break;
+
+        remaining = std::string(it + next_size, remaining.end());
+    }
+
+    chat_api_info ret = {};
+    ret.num_msgs = channels.size();
+
+    if(channels.size() > 0)
+    {
+        ret.msgs = new chat_info[ret.num_msgs];
+
+        for(int i=0; i < ret.num_msgs; i++)
+        {
+            ret.msgs[i].channel = cpp_str_to_c(channels[i]);
+            ret.msgs[i].msg = cpp_str_to_c(msgs[i]);
+        }
+    }
+
+    ret.num_in_channels = in_channels.size();
+
+    if(in_channels.size() > 0)
+    {
+        ret.in_channels = new chat_channel[in_channels.size()];
+
+        for(int i=0; i < (int)in_channels.size(); i++)
+        {
+            ret.in_channels[i].channel = cpp_str_to_c(in_channels[i]);
+        }
+    }
+
+    return ret;
+}
+
+void sa_destroy_chat_api_info(chat_api_info info)
+{
+    if(info.num_msgs > 0)
+    {
+        for(int i=0; i < info.num_msgs; i++)
+        {
+            free_string(info.msgs[i].channel);
+            free_string(info.msgs[i].msg);
+        }
+
+        delete [] info.msgs;
+    }
+
+    if(info.num_in_channels > 0)
+    {
+        for(int i=0; i < info.num_in_channels; i++)
+        {
+            free_string(info.in_channels[i].channel);
+        }
+
+        delete [] info.in_channels;
+    }
+}
+
 void sa_destroy_script_argument_list(script_argument_list argl)
 {
     for(int i=0; i < argl.num; i++)

@@ -38,14 +38,23 @@ extern "C"
         int length;
     };
 
+    struct chat_info
+    {
+        char* channel;
+        char* msg;
+    };
+
+    struct chat_channel
+    {
+        char* channel;
+    };
+
     struct chat_api_info
     {
-        char* channels;
-        char* msgs;
+        chat_info* msgs;
+        int num_msgs;
 
-        int num_channels_and_msgs;
-
-        char* in_channels;
+        chat_channel* in_channels;
         int num_in_channels;
     };
 
