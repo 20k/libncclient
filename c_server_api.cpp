@@ -17,5 +17,5 @@ char* sa_make_generic_server_command(const char* server_msg)
 
     std::string full_command = "client_command " + str;
 
-    return cpp_str_to_c(str);
+    return cpp_str_to_c(full_command);
 }
