@@ -181,6 +181,11 @@ char* sd_get_user(c_shared_data data)
     return cpp_str_to_c(data->get_user());
 }
 
+void sd_set_termination(c_shared_data data)
+{
+    data->should_terminate = true;
+}
+
 void free_string(char* c)
 {
     delete [] c;
