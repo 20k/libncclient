@@ -22,6 +22,13 @@ char* sa_make_generic_server_command(const char* server_msg)
     return cpp_str_to_c(full_command);
 }
 
+char* sa_make_autocomplete_request(const char* server_msg)
+{
+    std::string str = c_str_to_cpp(server_msg);
+
+    return cpp_str_to_c("client_scriptargs " + str);
+}
+
 bool is_local_command(const std::string& command)
 {
     if(command == "#")
@@ -118,9 +125,18 @@ char* sa_default_up_handling(const char* for_user, const char* server_msg, const
     return cpp_str_to_c(unknown_command);
 }
 
-void sa_poll_server(c_shared_data data)
+void sa_do_poll_server(c_shared_data data)
 {
     const char* str = "client_poll";
 
     sd_add_back_write(data, str);
+}
+
+void sa_do_autocomplete_request(c_shared_data data, const char* scriptname)
+{
+    char* req = sa_make_autocomplete_request(scriptname);
+
+    sd_add_back_write(data, req);
+
+    free_string(req);
 }
