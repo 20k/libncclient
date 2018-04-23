@@ -117,3 +117,10 @@ char* sa_default_up_handling(const char* for_user, const char* server_msg, const
 
     return cpp_str_to_c(unknown_command);
 }
+
+void sa_poll_server(c_shared_data data)
+{
+    const char* str = "client_poll";
+
+    sd_add_back_write(data, str);
+}
