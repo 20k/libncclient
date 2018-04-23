@@ -191,6 +191,16 @@ int sd_should_terminate(c_shared_data data)
     return data->should_terminate;
 }
 
+void sd_increment_termination_count(c_shared_data data)
+{
+    data->termination_count++;
+}
+
+int sd_get_termination_count(c_shared_data data)
+{
+    return data->termination_count;
+}
+
 void free_string(char* c)
 {
     delete [] c;

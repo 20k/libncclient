@@ -27,6 +27,9 @@ extern "C"
     void sd_set_termination(c_shared_data data);
     int sd_should_terminate(c_shared_data data);
 
+    void sd_increment_termination_count(c_shared_data data);
+    int sd_get_termination_count(c_shared_data data);
+
     void free_string(char*);
 }
 
