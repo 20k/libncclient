@@ -65,3 +65,53 @@ int sa_is_local_command(const char* server_msg)
 {
     return is_local_command(server_msg);
 }
+
+char* sa_default_up_handling(const char* for_user, const char* server_msg, const char* scripts_dir)
+{
+    if(for_user == nullptr || server_msg == nullptr || scripts_dir == nullptr)
+    {
+        printf("sa_default_up_handling error, nullptr argument\n");
+        return nullptr;
+    }
+
+    std::string up = "#up ";
+    std::string up_es6 = "#up_es6 ";
+    std::string dry = "#dry ";
+
+    std::string sdir(scripts_dir);
+    std::string unknown_command(server_msg);
+
+    std::vector<std::string> strings = no_ss_split(unknown_command, " ");
+
+    if((starts_with(unknown_command, up) || starts_with(unknown_command, dry)) && strings.size() == 3)
+    {
+        std::string name = strings[2];
+
+        std::string hardcoded_user(for_user);
+
+        std::string diskname = sdir + hardcoded_user + "." + name + ".es5.js";
+        std::string diskname_es6 = sdir + hardcoded_user + "." + name + ".js";
+
+        std::string comm = up;
+
+        if(starts_with(unknown_command, dry))
+            comm = dry;
+
+        std::string data = "";
+
+        if(file_exists(diskname))
+            data = read_file(diskname);
+
+        if(file_exists(diskname_es6))
+        {
+            data = read_file(diskname_es6);
+            comm = up_es6;
+        }
+
+        std::string final_command = comm + name + " " + data;
+
+        return cpp_str_to_c(final_command);
+    }
+
+    return cpp_str_to_c(unknown_command);
+}
