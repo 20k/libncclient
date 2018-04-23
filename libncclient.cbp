@@ -51,7 +51,6 @@
 		<Unit filename="c_net_client.h" />
 		<Unit filename="c_shared_data.cpp" />
 		<Unit filename="c_shared_data.h" />
-		<Unit filename="main.cpp" />
 		<Unit filename="nc_util.hpp" />
 		<Unit filename="socket.hpp" />
 		<Extensions>
