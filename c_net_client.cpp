@@ -23,49 +23,6 @@ namespace
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 
-std::string handle_up(c_shared_data shared, const std::string& unknown_command)
-{
-    std::string up = "client_command #up ";
-    std::string up_es6 = "client_command #up_es6 ";
-    std::string dry = "client_command #dry ";
-
-    std::vector<std::string> strings = no_ss_split(unknown_command, " ");
-
-    if((starts_with(unknown_command, up) || starts_with(unknown_command, dry)) && strings.size() == 3)
-    {
-        std::string name = strings[2];
-
-        char* c_user = sd_get_user(shared);
-        std::string hardcoded_user(c_user);
-        free_string(c_user);
-
-        std::string diskname = "./scripts/" + hardcoded_user + "." + name + ".es5.js";
-        std::string diskname_es6 = "./scripts/" + hardcoded_user + "." + name + ".js";
-
-        std::string comm = up;
-
-        if(starts_with(unknown_command, dry))
-            comm = dry;
-
-        std::string data = "";
-
-        if(file_exists(diskname))
-            data = read_file(diskname);
-
-        if(file_exists(diskname_es6))
-        {
-            data = read_file(diskname_es6);
-            comm = up_es6;
-        }
-
-        std::string final_command = comm + name + " " + data;
-
-        return final_command;
-    }
-
-    return unknown_command;
-}
-
 volatile static bool socket_alive = false;
 
 struct shared_context
@@ -119,8 +76,6 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
                 char* c_write = sd_get_front_write(shared);
                 std::string next_command(c_write);
                 free_string(c_write);
-
-                next_command = handle_up(shared, next_command);
 
                 if(ctx.sock->write(next_command))
                 {
@@ -259,14 +214,6 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 }
 }
 
-/*void test_http_client(c_shared_data shared)
-{
-    shared_context* ctx = new shared_context();
-
-    std::thread(handle_async_read, shared, std::ref(*ctx)).detach();
-    std::thread(handle_async_write, shared, std::ref(*ctx)).detach();
-    std::thread(watchdog, shared, std::ref(*ctx)).detach();
-}*/
 
 void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
 {
@@ -279,13 +226,3 @@ void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
     std::thread(handle_async_write, data, std::ref(*ctx)).detach();
     std::thread(watchdog, data, std::ref(*ctx), hip, hpo).detach();
 }
-
-/*c_net_client nc_alloc()
-{
-    return new net_client;
-}
-
-void nc_destroy(c_net_client data)
-{
-    delete data;
-}*/
