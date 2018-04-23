@@ -278,3 +278,24 @@ script_argument_list sa_server_scriptargs_to_list(server_command_info info)
 
     return ret;
 }
+
+char* sa_server_scriptargs_invalid_to_script_name(server_command_info info)
+{
+    if(info.data == nullptr)
+        return nullptr;
+
+    if(info.length <= 0)
+        return nullptr;
+
+    if(info.data[0] != ' ')
+        return nullptr;
+
+    std::string full(info.data);
+
+    std::string str(full.begin() + 1, full.end());
+
+    if(str.size() == 0)
+        return nullptr;
+
+    return cpp_str_to_c(str);
+}

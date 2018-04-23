@@ -62,6 +62,9 @@ extern "C"
     char* sa_command_to_human_readable(server_command_info info);
 
     script_argument_list sa_server_scriptargs_to_list(server_command_info info);
+
+    ///may return nullptr
+    char* sa_server_scriptargs_invalid_to_script_name(server_command_info info);
 }
 
 #endif // C_SERVER_API_H_INCLUDED
