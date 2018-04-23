@@ -257,4 +257,28 @@ std::string get_host_from_fullname(const std::string& in)
     return found[0];
 }
 
+inline
+char* cpp_str_to_c(const std::string& str)
+{
+    int len = str.size() + 1;
+
+    char* ptr = new char[len]();
+
+    for(int i=0; i < (int)str.size(); i++)
+    {
+        ptr[i] = str[i];
+    }
+
+    return ptr;
+}
+
+inline
+std::string c_str_to_cpp(const char* in)
+{
+    if(in == nullptr)
+        return std::string();
+
+    return std::string(in);
+}
+
 #endif // NC_UTIL_HPP_INCLUDED

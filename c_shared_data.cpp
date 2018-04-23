@@ -1,4 +1,5 @@
 #include "c_shared_data.h"
+#include "nc_util.hpp"
 
 #include <string>
 
@@ -6,20 +7,6 @@
 #include <deque>
 #include <string>
 #include <mutex>
-
-char* cpp_str_to_c(const std::string& str)
-{
-    int len = str.size() + 1;
-
-    char* ptr = new char[len]();
-
-    for(int i=0; i < (int)str.size(); i++)
-    {
-        ptr[i] = str[i];
-    }
-
-    return ptr;
-}
 
 struct shared_data
 {
