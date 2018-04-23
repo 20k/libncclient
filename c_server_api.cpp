@@ -179,7 +179,7 @@ server_command_info sa_server_response_to_info(const char* server_response, int 
 
             std::string data_str = std::string(str.begin() + offset_str.size(), str.end());
 
-            return {i.first, cpp_str_to_c(data_str), response_length - (int)data_str.size()};
+            return {i.first, cpp_str_to_c(data_str), (int)data_str.size()};
         }
     }
 
@@ -204,7 +204,7 @@ void sa_destroy_script_argument_list(script_argument_list argl)
         free_string(argl.args[i].val);
     }
 
-    free_string(argl.args);
+    delete [] argl.args;
 }
 
 script_argument_list sa_server_scriptargs_to_list(server_command_info info)
