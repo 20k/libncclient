@@ -21,6 +21,7 @@
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 
+static
 std::string handle_up(c_shared_data shared, const std::string& unknown_command)
 {
     std::string up = "client_command #up ";
@@ -97,6 +98,7 @@ struct shared_context
     }
 };
 
+static
 void handle_async_write(c_shared_data shared, shared_context& ctx)
 {
     while(1)
@@ -140,6 +142,7 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
     printf("write\n");
 }
 
+static
 void check_auth(c_shared_data shared, const std::string& str)
 {
     std::string auth_str = "command ####registered secret ";
@@ -162,6 +165,7 @@ void check_auth(c_shared_data shared, const std::string& str)
     }
 }
 
+static
 void handle_async_read(c_shared_data shared, shared_context& ctx)
 {
     boost::system::error_code ec;
@@ -202,6 +206,7 @@ void handle_async_read(c_shared_data shared, shared_context& ctx)
     printf("read\n");
 }
 
+static
 void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host_ip, const std::string& host_port)
 {
     while(1)
