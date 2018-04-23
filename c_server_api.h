@@ -48,6 +48,7 @@ extern "C"
 
     struct script_argument_list
     {
+        char* scriptname;
         script_argument* args;
         int num;
     };

@@ -204,6 +204,7 @@ void sa_destroy_script_argument_list(script_argument_list argl)
         free_string(argl.args[i].val);
     }
 
+    free_string(argl.scriptname);
     delete [] argl.args;
 }
 
@@ -260,6 +261,7 @@ script_argument_list sa_server_scriptargs_to_list(server_command_info info)
     }
 
     script_argument_list ret;
+    ret.scriptname = cpp_str_to_c(scriptname);
     ret.args = new script_argument[args.size()];
     ret.num = args.size();
 
