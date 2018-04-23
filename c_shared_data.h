@@ -8,6 +8,8 @@ typedef shared_data* c_shared_data;
 c_shared_data sd_alloc();
 void sd_destroy(c_shared_data data);
 
+void sd_set_auth(c_shared_data data, char* auth);
+
 int sd_has_front_read(c_shared_data data);
 int sd_has_front_write(c_shared_data data);
 

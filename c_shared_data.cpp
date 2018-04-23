@@ -120,6 +120,16 @@ void sd_destroy(c_shared_data data)
         delete data;
 }
 
+void sd_set_auth(c_shared_data data, char* auth)
+{
+    if(auth == nullptr)
+        return;
+
+    std::string str(auth);
+
+    data->auth = str;
+}
+
 int sd_has_front_read(c_shared_data data)
 {
     return data->has_front_read();
