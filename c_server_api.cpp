@@ -196,6 +196,17 @@ char* sa_command_to_human_readable(server_command_info info)
     return cpp_str_to_c(cp.c_str());
 }
 
+void sa_destroy_script_argument_list(script_argument_list argl)
+{
+    for(int i=0; i < argl.num; i++)
+    {
+        free_string(argl.args[i].key);
+        free_string(argl.args[i].val);
+    }
+
+    free_string(argl.args);
+}
+
 script_argument_list sa_server_scriptargs_to_list(server_command_info info)
 {
     std::string in(info.data, info.length);
@@ -236,8 +247,6 @@ script_argument_list sa_server_scriptargs_to_list(server_command_info info)
     strings.erase(strings.begin());
 
     std::vector<std::pair<std::string, std::string>> args;
-
-    //int len = strings.size();
 
     if((strings.size() % 2) != 0)
         return {nullptr, 0};
