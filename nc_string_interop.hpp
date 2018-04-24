@@ -61,6 +61,19 @@ std::string c_str_sized_to_cpp(sized_view str)
 }
 
 inline
+std::string c_str_sized_consume(sized_string str)
+{
+    if(str.str == nullptr)
+        return {};
+
+    std::string ret = c_str_sized_to_cpp(str);
+
+    free_sized_string(str);
+
+    return ret;
+}
+
+inline
 sized_view make_view(const std::string& str)
 {
     return {str.c_str(), (int)str.size()};
