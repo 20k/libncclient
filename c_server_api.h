@@ -74,7 +74,7 @@ extern "C"
     void sa_destroy_chat_api_info(chat_api_info info);
     void sa_destroy_script_argument_list(script_argument_list argl);
 
-    server_command_info sa_server_response_to_info(sized_string server_response);
+    server_command_info sa_server_response_to_info(sized_view server_response);
 
     ///server_command_command
     sized_string sa_command_to_human_readable(server_command_info info);

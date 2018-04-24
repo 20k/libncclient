@@ -152,10 +152,10 @@ void sa_destroy_server_command_info(server_command_info info)
     free_sized_string(info.data);
 }
 
-server_command_info sa_server_response_to_info(const char* server_response, int response_length)
+server_command_info sa_server_response_to_info(sized_view server_response)
 {
-    if(server_response == nullptr)
-        return {error_invalid_response, nullptr, 0};
+    if(server_response.str == nullptr || server_response.num <= 0)
+        return {error_invalid_response, {}};
 
     std::string command_str = "command ";
     std::string chat_api = "chat_api ";
@@ -171,7 +171,7 @@ server_command_info sa_server_response_to_info(const char* server_response, int 
     dat.push_back({server_command_server_scriptargs_invalid, invalid_str});
     dat.push_back({server_command_server_scriptargs_ratelimit, ratelimit_str});
 
-    std::string str(server_response, response_length);
+    std::string str = c_str_sized_to_cpp(server_response);
 
     for(auto& i : dat)
     {
@@ -181,11 +181,11 @@ server_command_info sa_server_response_to_info(const char* server_response, int 
 
             std::string data_str = std::string(str.begin() + offset_str.size(), str.end());
 
-            return {i.first, cpp_str_to_c(data_str), (int)data_str.size()};
+            return {i.first, make_copy(data_str)};
         }
     }
 
-    return {error_invalid_response, nullptr, 0};
+    return {error_invalid_response, {}};
 }
 
 sized_string sa_command_to_human_readable(server_command_info info)
