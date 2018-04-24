@@ -17,7 +17,7 @@ std::string c_str_consume(char* c)
     return ret;
 }
 
-inline
+/*inline
 sized_string cpp_str_to_sized_c(const std::string& str)
 {
     int len = str.size() + 1;
@@ -30,7 +30,7 @@ sized_string cpp_str_to_sized_c(const std::string& str)
     }
 
     return {ptr, len-1};
-}
+}*/
 
 inline
 std::string c_str_sized_to_cpp(sized_string str)
@@ -44,6 +44,27 @@ std::string c_str_sized_to_cpp(sized_string str)
     }
 
     return ret;
+}
+
+inline
+sized_string sized_view(const std::string& str)
+{
+    return {str.c_str(), (int)str.size()};
+}
+
+inline
+sized_string sized_copy(const std::string& str)
+{
+    int len = str.size() + 1;
+
+    char* ptr = new char[len]();
+
+    for(int i=0; i < (int)str.size(); i++)
+    {
+        ptr[i] = str[i];
+    }
+
+    return {ptr, len-1};
 }
 
 inline

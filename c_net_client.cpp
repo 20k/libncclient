@@ -111,7 +111,7 @@ void check_auth(c_shared_data shared, const std::string& str)
         {
             write_all_bin("key.key", key);
 
-            sd_set_auth(shared, cpp_str_to_sized_c(key));
+            sd_set_auth(shared, sized_view(key));
         }
         else
         {
@@ -145,7 +145,7 @@ void handle_async_read(c_shared_data shared, shared_context& ctx)
             std::string next_command = ctx.sock->get_read();
 
             check_auth(shared, next_command);
-            sd_add_back_read(shared, cpp_str_to_sized_c(next_command));
+            sd_add_back_read(shared, sized_view(next_command));
         }
         catch(...)
         {
@@ -189,7 +189,7 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
                 std::string auth_str = "client_command auth client " + c_str_sized_to_cpp(auth);
                 free_sized_string(auth);
 
-                sd_add_back_write(shared, cpp_str_to_sized_c(auth_str));
+                sd_add_back_write(shared, sized_view(auth_str));
 
                 socket_alive = true;
 

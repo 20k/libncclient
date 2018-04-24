@@ -118,7 +118,7 @@ void sd_set_auth(c_shared_data data, sized_string auth)
 
 sized_string sd_get_auth(c_shared_data data)
 {
-    return cpp_str_to_sized_c(data->auth);
+    return sized_copy(data->auth);
 }
 
 int sd_has_front_read(c_shared_data data)
@@ -133,12 +133,12 @@ int sd_has_front_write(c_shared_data data)
 
 sized_string sd_get_front_read(c_shared_data data)
 {
-    return cpp_str_to_sized_c(data->get_front_read());
+    return sized_copy(data->get_front_read());
 }
 
 sized_string sd_get_front_write(c_shared_data data)
 {
-    return cpp_str_to_sized_c(data->get_front_write());
+    return sized_copy(data->get_front_write());
 }
 
 void sd_add_back_write(c_shared_data data, sized_string write)
@@ -170,7 +170,7 @@ void sd_set_user(c_shared_data data, sized_string user)
 
 sized_string sd_get_user(c_shared_data data)
 {
-    return cpp_str_to_sized_c(data->get_user());
+    return sized_copy(data->get_user());
 }
 
 void sd_set_termination(c_shared_data data)
