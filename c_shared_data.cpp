@@ -108,7 +108,7 @@ void sd_destroy(c_shared_data data)
         delete data;
 }
 
-void sd_set_auth(c_shared_data data, sized_string auth)
+void sd_set_auth(c_shared_data data, sized_view auth)
 {
     if(auth.str == nullptr)
         return;
@@ -118,7 +118,7 @@ void sd_set_auth(c_shared_data data, sized_string auth)
 
 sized_string sd_get_auth(c_shared_data data)
 {
-    return sized_copy(data->auth);
+    return make_copy(data->auth);
 }
 
 int sd_has_front_read(c_shared_data data)
@@ -133,15 +133,15 @@ int sd_has_front_write(c_shared_data data)
 
 sized_string sd_get_front_read(c_shared_data data)
 {
-    return sized_copy(data->get_front_read());
+    return make_copy(data->get_front_read());
 }
 
 sized_string sd_get_front_write(c_shared_data data)
 {
-    return sized_copy(data->get_front_write());
+    return make_copy(data->get_front_write());
 }
 
-void sd_add_back_write(c_shared_data data, sized_string write)
+void sd_add_back_write(c_shared_data data, sized_view write)
 {
     if(write.str == nullptr)
         return;
@@ -151,7 +151,7 @@ void sd_add_back_write(c_shared_data data, sized_string write)
     return data->add_back_write(str);
 }
 
-void sd_add_back_read(c_shared_data data, sized_string read)
+void sd_add_back_read(c_shared_data data, sized_view read)
 {
     if(read.str == nullptr)
         return;
@@ -170,7 +170,7 @@ void sd_set_user(c_shared_data data, sized_string user)
 
 sized_string sd_get_user(c_shared_data data)
 {
-    return sized_copy(data->get_user());
+    return make_copy(data->get_user());
 }
 
 void sd_set_termination(c_shared_data data)

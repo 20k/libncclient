@@ -111,7 +111,7 @@ void check_auth(c_shared_data shared, const std::string& str)
         {
             write_all_bin("key.key", key);
 
-            sd_set_auth(shared, sized_view(key));
+            sd_set_auth(shared, make_view(key));
         }
         else
         {
@@ -145,7 +145,7 @@ void handle_async_read(c_shared_data shared, shared_context& ctx)
             std::string next_command = ctx.sock->get_read();
 
             check_auth(shared, next_command);
-            sd_add_back_read(shared, sized_view(next_command));
+            sd_add_back_read(shared, make_view(next_command));
         }
         catch(...)
         {
@@ -179,17 +179,17 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 
                 std::cout << "Try Reconnect" << std::endl;
 
-                sd_add_back_read(shared, sized_str_from_raw("Connecting..."));
+                sd_add_back_read(shared, make_view_from_raw("Connecting..."));
 
                 ctx.connect(host, port);
 
-                sd_add_back_read(shared, sized_str_from_raw("`LConnected`"));
+                sd_add_back_read(shared, make_view_from_raw("`LConnected`"));
 
                 sized_string auth = sd_get_auth(shared);
                 std::string auth_str = "client_command auth client " + c_str_sized_to_cpp(auth);
                 free_sized_string(auth);
 
-                sd_add_back_write(shared, sized_view(auth_str));
+                sd_add_back_write(shared, make_view(auth_str));
 
                 socket_alive = true;
 
@@ -197,7 +197,7 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
             }
             catch(...)
             {
-                sd_add_back_read(shared, sized_str_from_raw("`DConnection to the server failed`"));
+                sd_add_back_read(shared, make_view_from_raw("`DConnection to the server failed`"));
 
                 std::cout << "Server down" << std::endl;
                 sf::sleep(sf::milliseconds(5000));

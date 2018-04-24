@@ -7,7 +7,15 @@ extern "C"
 
     typedef shared_data* c_shared_data;
 
+    ///owning
     struct sized_string
+    {
+        const char* str;
+        int num;
+    };
+
+    ///non owning
+    struct sized_view
     {
         const char* str;
         int num;
@@ -16,7 +24,7 @@ extern "C"
     c_shared_data sd_alloc();
     void sd_destroy(c_shared_data data);
 
-    void sd_set_auth(c_shared_data data, sized_string auth);
+    void sd_set_auth(c_shared_data data, sized_view auth);
     sized_string sd_get_auth(c_shared_data data);
 
     int sd_has_front_read(c_shared_data data);
@@ -25,10 +33,10 @@ extern "C"
     sized_string sd_get_front_read(c_shared_data data);
     sized_string sd_get_front_write(c_shared_data data);
 
-    void sd_add_back_write(c_shared_data data, sized_string write);
-    void sd_add_back_read(c_shared_data data, sized_string read);
+    void sd_add_back_write(c_shared_data data, sized_view write);
+    void sd_add_back_read(c_shared_data data, sized_view read);
 
-    void sd_set_user(c_shared_data data, sized_string user);
+    void sd_set_user(c_shared_data data, sized_view user);
     sized_string sd_get_user(c_shared_data data);
 
     void sd_set_termination(c_shared_data data);

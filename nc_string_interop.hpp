@@ -47,13 +47,27 @@ std::string c_str_sized_to_cpp(sized_string str)
 }
 
 inline
-sized_string sized_view(const std::string& str)
+std::string c_str_sized_to_cpp(sized_view str)
+{
+    std::string ret;
+    ret.resize(str.num);
+
+    for(int i=0; i < str.num; i++)
+    {
+        ret[i] = str.str[i];
+    }
+
+    return ret;
+}
+
+inline
+sized_view make_view(const std::string& str)
 {
     return {str.c_str(), (int)str.size()};
 }
 
 inline
-sized_string sized_copy(const std::string& str)
+sized_string make_copy(const std::string& str)
 {
     int len = str.size() + 1;
 
@@ -68,7 +82,7 @@ sized_string sized_copy(const std::string& str)
 }
 
 inline
-sized_string sized_str_from_raw(const char* c)
+sized_view make_view_from_raw(const char* c)
 {
     return {c, (int)strlen(c)};
 }
