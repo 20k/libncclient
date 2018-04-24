@@ -161,7 +161,7 @@ void sd_add_back_read(c_shared_data data, sized_view read)
     return data->add_back_read(str);
 }
 
-void sd_set_user(c_shared_data data, sized_string user)
+void sd_set_user(c_shared_data data, sized_view user)
 {
     std::string str = c_str_sized_to_cpp(user);
 
