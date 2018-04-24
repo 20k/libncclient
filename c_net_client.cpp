@@ -1,6 +1,7 @@
 #include "c_net_client.h"
 #include "nc_util.hpp"
 #include "socket.hpp"
+#include "nc_string_interop.hpp"
 
 //#include <crapmud/socket_shared.hpp>
 
@@ -73,9 +74,9 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
 
             if(sd_has_front_write(shared))
             {
-                char* c_write = sd_get_front_write(shared);
-                std::string next_command(c_write);
-                free_string(c_write);
+                sized_string c_write = sd_get_front_write(shared);
+                std::string next_command = c_str_sized_to_cpp(c_write);
+                free_sized_string(c_write);
 
                 if(ctx.sock->write(next_command))
                 {
@@ -110,7 +111,7 @@ void check_auth(c_shared_data shared, const std::string& str)
         {
             write_all_bin("key.key", key);
 
-            sd_set_auth(shared, key.c_str());
+            sd_set_auth(shared, cpp_str_to_sized_c(key));
         }
         else
         {
@@ -144,7 +145,7 @@ void handle_async_read(c_shared_data shared, shared_context& ctx)
             std::string next_command = ctx.sock->get_read();
 
             check_auth(shared, next_command);
-            sd_add_back_read(shared, next_command.c_str());
+            sd_add_back_read(shared, cpp_str_to_sized_c(next_command));
         }
         catch(...)
         {
@@ -178,17 +179,17 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 
                 std::cout << "Try Reconnect" << std::endl;
 
-                sd_add_back_read(shared, "Connecting...");
+                sd_add_back_read(shared, sized_str_from_raw("Connecting..."));
 
                 ctx.connect(host, port);
 
-                sd_add_back_read(shared, "`LConnected`");
+                sd_add_back_read(shared, sized_str_from_raw("`LConnected`"));
 
-                char* auth = sd_get_auth(shared);
-                std::string auth_str = "client_command auth client " + std::string(auth);
-                free_string(auth);
+                sized_string auth = sd_get_auth(shared);
+                std::string auth_str = "client_command auth client " + c_str_sized_to_cpp(auth);
+                free_sized_string(auth);
 
-                sd_add_back_write(shared, auth_str.c_str());
+                sd_add_back_write(shared, cpp_str_to_sized_c(auth_str));
 
                 socket_alive = true;
 
@@ -196,7 +197,7 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
             }
             catch(...)
             {
-                sd_add_back_read(shared, "`DConnection to the server failed`");
+                sd_add_back_read(shared, sized_str_from_raw("`DConnection to the server failed`"));
 
                 std::cout << "Server down" << std::endl;
                 sf::sleep(sf::milliseconds(5000));

@@ -1,5 +1,6 @@
 #include "c_shared_data.h"
 #include "nc_util.hpp"
+#include "nc_string_interop.hpp"
 
 #include <string>
 
@@ -107,19 +108,17 @@ void sd_destroy(c_shared_data data)
         delete data;
 }
 
-void sd_set_auth(c_shared_data data, const char* auth)
+void sd_set_auth(c_shared_data data, sized_string auth)
 {
-    if(auth == nullptr)
+    if(auth.str == nullptr)
         return;
 
-    std::string str(auth);
-
-    data->auth = str;
+    data->auth = c_str_sized_to_cpp(auth);
 }
 
-char* sd_get_auth(c_shared_data data)
+sized_string sd_get_auth(c_shared_data data)
 {
-    return cpp_str_to_c(data->auth);
+    return cpp_str_to_sized_c(data->auth);
 }
 
 int sd_has_front_read(c_shared_data data)
@@ -132,45 +131,46 @@ int sd_has_front_write(c_shared_data data)
     return data->has_front_write();
 }
 
-char* sd_get_front_read(c_shared_data data)
+sized_string sd_get_front_read(c_shared_data data)
 {
-    return cpp_str_to_c(data->get_front_read());
+    return cpp_str_to_sized_c(data->get_front_read());
 }
 
-char* sd_get_front_write(c_shared_data data)
+sized_string sd_get_front_write(c_shared_data data)
 {
-    return cpp_str_to_c(data->get_front_write());
+    return cpp_str_to_sized_c(data->get_front_write());
 }
 
-void sd_add_back_write(c_shared_data data, const char* write)
+void sd_add_back_write(c_shared_data data, sized_string write)
 {
-    if(write == nullptr)
+    if(write.str == nullptr)
         return;
 
-    std::string str(write);
+    std::string str = c_str_sized_to_cpp(write);
 
     return data->add_back_write(str);
 }
-void sd_add_back_read(c_shared_data data, const char* read)
+
+void sd_add_back_read(c_shared_data data, sized_string read)
 {
-    if(read == nullptr)
+    if(read.str == nullptr)
         return;
 
-    std::string str(read);
+    std::string str = c_str_sized_to_cpp(read);
 
     return data->add_back_read(str);
 }
 
-void sd_set_user(c_shared_data data, const char* user)
+void sd_set_user(c_shared_data data, sized_string user)
 {
-    std::string str(user);
+    std::string str = c_str_sized_to_cpp(user);
 
     return data->set_user(str);
 }
 
-char* sd_get_user(c_shared_data data)
+sized_string sd_get_user(c_shared_data data)
 {
-    return cpp_str_to_c(data->get_user());
+    return cpp_str_to_sized_c(data->get_user());
 }
 
 void sd_set_termination(c_shared_data data)
@@ -199,4 +199,12 @@ void free_string(char* c)
         return;
 
     delete [] c;
+}
+
+void free_sized_string(sized_string str)
+{
+    if(str.str == nullptr)
+        return;
+
+    delete [] str.str;
 }

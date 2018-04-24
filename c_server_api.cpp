@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string_view>
+#include <cstring>
 
 char* sa_make_chat_command(const char* chat_channel, const char* chat_msg)
 {
@@ -130,14 +131,14 @@ void sa_do_poll_server(c_shared_data data)
 {
     const char* str = "client_poll";
 
-    sd_add_back_write(data, str);
+    sd_add_back_write(data, {str, strlen(str)});
 }
 
 void sa_do_autocomplete_request(c_shared_data data, const char* scriptname)
 {
     char* req = sa_make_autocomplete_request(scriptname);
 
-    sd_add_back_write(data, req);
+    sd_add_back_write(data, {req, strlen(req)});
 
     free_string(req);
 }
