@@ -67,6 +67,12 @@ sized_view make_view(const std::string& str)
 }
 
 inline
+sized_view make_view(sized_string str)
+{
+    return {str.str, str.num};
+}
+
+inline
 sized_string make_copy(const std::string& str)
 {
     int len = str.size() + 1;
@@ -76,6 +82,21 @@ sized_string make_copy(const std::string& str)
     for(int i=0; i < (int)str.size(); i++)
     {
         ptr[i] = str[i];
+    }
+
+    return {ptr, len-1};
+}
+
+inline
+sized_string make_copy(sized_string str)
+{
+    int len = str.num + 1;
+
+    char* ptr = new char[len]();
+
+    for(int i=0; i < str.num; i++)
+    {
+        ptr[i] = str.str[i];
     }
 
     return {ptr, len-1};

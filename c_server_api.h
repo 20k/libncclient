@@ -5,21 +5,21 @@
 
 extern "C"
 {
-    char* sa_make_chat_command(const char* chat_channel, const char* chat_msg);
+    sized_string sa_make_chat_command(sized_view chat_channel, sized_view chat_msg);
     ///does not handle #up
-    char* sa_make_generic_server_command(const char* server_msg);
+    sized_string sa_make_generic_server_command(sized_view server_msg);
 
-    char* sa_make_autocomplete_request(const char* scriptname);
+    sized_string sa_make_autocomplete_request(sized_view scriptname);
 
-    int sa_is_local_command(const char* server_msg);
+    int sa_is_local_command(sized_view server_msg);
 
     ///handles everything for #up, #up_es6, and #dry
     ///you should free server_msg and use the return value
     ///converts #up scriptname -> #up scriptname script_data
-    char* sa_default_up_handling(const char* for_user, const char* server_msg, const char* scripts_dir);
+    sized_string sa_default_up_handling(sized_view for_user, sized_view server_msg, sized_view scripts_dir);
 
     void sa_do_poll_server(c_shared_data data);
-    void sa_do_autocomplete_request(c_shared_data data, const char* scriptname);
+    void sa_do_autocomplete_request(c_shared_data data, sized_view scriptname);
 
     enum server_command_type
     {
@@ -34,19 +34,18 @@ extern "C"
     struct server_command_info
     {
         server_command_type type;
-        char* data;
-        int length;
+        sized_string data;
     };
 
     struct chat_info
     {
-        char* channel;
-        char* msg;
+        sized_string channel;
+        sized_string msg;
     };
 
     struct chat_channel
     {
-        char* channel;
+        sized_string channel;
     };
 
     struct chat_api_info
@@ -60,13 +59,13 @@ extern "C"
 
     struct script_argument
     {
-        char* key;
-        char* val;
+        sized_string key;
+        sized_string val;
     };
 
     struct script_argument_list
     {
-        char* scriptname;
+        sized_string scriptname;
         script_argument* args;
         int num;
     };
@@ -75,10 +74,10 @@ extern "C"
     void sa_destroy_chat_api_info(chat_api_info info);
     void sa_destroy_script_argument_list(script_argument_list argl);
 
-    server_command_info sa_server_response_to_info(const char* server_response, int response_length);
+    server_command_info sa_server_response_to_info(sized_string server_response);
 
     ///server_command_command
-    char* sa_command_to_human_readable(server_command_info info);
+    sized_string sa_command_to_human_readable(server_command_info info);
 
     ///server_command_chat_api
     chat_api_info sa_chat_api_to_info(server_command_info info);
@@ -88,10 +87,10 @@ extern "C"
 
     ///may return nullptr
     ///server_command_server_scriptargs_invalid
-    char* sa_server_scriptargs_invalid_to_script_name(server_command_info info);
+    sized_string sa_server_scriptargs_invalid_to_script_name(server_command_info info);
 
     ///server_command_server_scriptargs_ratelimit
-    char* sa_server_scriptargs_ratelimit_to_script_name(server_command_info info);
+    sized_string sa_server_scriptargs_ratelimit_to_script_name(server_command_info info);
 }
 
 #endif // C_SERVER_API_H_INCLUDED

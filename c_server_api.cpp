@@ -4,31 +4,32 @@
 #include <iostream>
 #include <string_view>
 #include <cstring>
+#include "nc_string_interop.hpp"
 
-char* sa_make_chat_command(const char* chat_channel, const char* chat_msg)
+sized_string sa_make_chat_command(sized_view chat_channel, sized_view chat_msg)
 {
-    std::string s1 = c_str_to_cpp(chat_channel);
-    std::string s2 = c_str_to_cpp(chat_msg);
+    std::string s1 = c_str_sized_to_cpp(chat_channel);
+    std::string s2 = c_str_sized_to_cpp(chat_msg);
 
     std::string full = "client_chat #hs.msg.send({channel:\"" + s1 + "\", msg:\"" + s2 + "\"})";
 
-    return cpp_str_to_c(full);
+    return make_copy(full);
 }
 
-char* sa_make_generic_server_command(const char* server_msg)
+sized_string sa_make_generic_server_command(sized_view server_msg)
 {
-    std::string str = c_str_to_cpp(server_msg);
+    std::string str = c_str_sized_to_cpp(server_msg);
 
     std::string full_command = "client_command " + str;
 
-    return cpp_str_to_c(full_command);
+    return make_copy(full_command);
 }
 
-char* sa_make_autocomplete_request(const char* server_msg)
+sized_string sa_make_autocomplete_request(sized_view server_msg)
 {
-    std::string str = c_str_to_cpp(server_msg);
+    std::string str = c_str_sized_to_cpp(server_msg);
 
-    return cpp_str_to_c("client_scriptargs " + str);
+    return make_copy("client_scriptargs " + str);
 }
 
 bool is_local_command(const std::string& command)
@@ -77,20 +78,20 @@ int sa_is_local_command(const char* server_msg)
     return is_local_command(server_msg);
 }
 
-char* sa_default_up_handling(const char* for_user, const char* server_msg, const char* scripts_dir)
+sized_string sa_default_up_handling(sized_view for_user, sized_view server_msg, sized_view scripts_dir)
 {
-    if(for_user == nullptr || server_msg == nullptr || scripts_dir == nullptr)
+    if(for_user.str == nullptr || server_msg.str == nullptr || scripts_dir.str == nullptr)
     {
         printf("sa_default_up_handling error, nullptr argument\n");
-        return nullptr;
+        return {};
     }
 
     std::string up = "#up ";
     std::string up_es6 = "#up_es6 ";
     std::string dry = "#dry ";
 
-    std::string sdir(scripts_dir);
-    std::string unknown_command(server_msg);
+    std::string sdir = c_str_sized_to_cpp(scripts_dir);
+    std::string unknown_command = c_str_sized_to_cpp(server_msg);
 
     std::vector<std::string> strings = no_ss_split(unknown_command, " ");
 
@@ -98,7 +99,7 @@ char* sa_default_up_handling(const char* for_user, const char* server_msg, const
     {
         std::string name = strings[1];
 
-        std::string hardcoded_user(for_user);
+        std::string hardcoded_user = c_str_sized_to_cpp(for_user);
 
         std::string diskname = sdir + hardcoded_user + "." + name + ".es5.js";
         std::string diskname_es6 = sdir + hardcoded_user + "." + name + ".js";
@@ -121,34 +122,34 @@ char* sa_default_up_handling(const char* for_user, const char* server_msg, const
 
         std::string final_command = comm + name + " " + data;
 
-        return cpp_str_to_c(final_command);
+        return make_copy(final_command);
     }
 
-    return cpp_str_to_c(unknown_command);
+    return make_copy(unknown_command);
 }
 
 void sa_do_poll_server(c_shared_data data)
 {
     const char* str = "client_poll";
 
-    sd_add_back_write(data, {str, strlen(str)});
+    sd_add_back_write(data, make_view_from_raw(str));
 }
 
-void sa_do_autocomplete_request(c_shared_data data, const char* scriptname)
+void sa_do_autocomplete_request(c_shared_data data, sized_view scriptname)
 {
-    char* req = sa_make_autocomplete_request(scriptname);
+    sized_string req = sa_make_autocomplete_request(scriptname);
 
-    sd_add_back_write(data, {req, strlen(req)});
+    sd_add_back_write(data, make_view(req));
 
-    free_string(req);
+    free_sized_string(req);
 }
 
 void sa_destroy_server_command_info(server_command_info info)
 {
-    if(info.data == nullptr)
+    if(info.data.num == 0)
         return;
 
-    free_string(info.data);
+    free_sized_string(info.data);
 }
 
 server_command_info sa_server_response_to_info(const char* server_response, int response_length)
@@ -187,22 +188,22 @@ server_command_info sa_server_response_to_info(const char* server_response, int 
     return {error_invalid_response, nullptr, 0};
 }
 
-char* sa_command_to_human_readable(server_command_info info)
+sized_string sa_command_to_human_readable(server_command_info info)
 {
-    if(info.data == nullptr)
-        return nullptr;
+    if(info.data.num == 0 || info.data.str == nullptr)
+        return {};
 
-    std::string cp(info.data, info.length);
+    std::string cp = c_str_sized_to_cpp(info.data);
 
-    return cpp_str_to_c(cp.c_str());
+    return make_copy(cp);
 }
 
 chat_api_info sa_chat_api_to_info(server_command_info info)
 {
-    if(info.data == nullptr || info.length == 0)
+    if(info.data.num == 0 || info.data.str == nullptr)
         return {};
 
-    std::string chat_in(info.data, info.length);
+    std::string chat_in = c_str_sized_to_cpp(info.data);
 
     auto post_intro = chat_in.begin();
 
@@ -300,8 +301,8 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
 
         for(int i=0; i < ret.num_msgs; i++)
         {
-            ret.msgs[i].channel = cpp_str_to_c(channels[i]);
-            ret.msgs[i].msg = cpp_str_to_c(msgs[i]);
+            ret.msgs[i].channel = make_copy(channels[i]);
+            ret.msgs[i].msg = make_copy(msgs[i]);
         }
     }
 
@@ -313,7 +314,7 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
 
         for(int i=0; i < (int)in_channels.size(); i++)
         {
-            ret.in_channels[i].channel = cpp_str_to_c(in_channels[i]);
+            ret.in_channels[i].channel = make_copy(in_channels[i]);
         }
     }
 
@@ -326,8 +327,8 @@ void sa_destroy_chat_api_info(chat_api_info info)
     {
         for(int i=0; i < info.num_msgs; i++)
         {
-            free_string(info.msgs[i].channel);
-            free_string(info.msgs[i].msg);
+            free_sized_string(info.msgs[i].channel);
+            free_sized_string(info.msgs[i].msg);
         }
 
         delete [] info.msgs;
@@ -337,7 +338,7 @@ void sa_destroy_chat_api_info(chat_api_info info)
     {
         for(int i=0; i < info.num_in_channels; i++)
         {
-            free_string(info.in_channels[i].channel);
+            free_sized_string(info.in_channels[i].channel);
         }
 
         delete [] info.in_channels;
@@ -348,11 +349,11 @@ void sa_destroy_script_argument_list(script_argument_list argl)
 {
     for(int i=0; i < argl.num; i++)
     {
-        free_string(argl.args[i].key);
-        free_string(argl.args[i].val);
+        free_sized_string(argl.args[i].key);
+        free_sized_string(argl.args[i].val);
     }
 
-    free_string(argl.scriptname);
+    free_sized_string(argl.scriptname);
 
     if(argl.args != nullptr)
         delete [] argl.args;
@@ -360,10 +361,10 @@ void sa_destroy_script_argument_list(script_argument_list argl)
 
 script_argument_list sa_server_scriptargs_to_list(server_command_info info)
 {
-    if(info.length == 0)
-        return {nullptr, nullptr, 0};
+    if(info.data.num == 0 || info.data.str == nullptr)
+        return {};
 
-    std::string in(info.data, info.length);
+    std::string in = c_str_sized_to_cpp(info.data);
 
     ///TODO: Make all server/client communication use this format
     std::string_view view(&in[0]);
@@ -394,7 +395,7 @@ script_argument_list sa_server_scriptargs_to_list(server_command_info info)
     }
 
     if(strings.size() == 0)
-        return {nullptr, nullptr, 0};
+        return {};
 
     std::string scriptname = strings[0];
 
@@ -403,7 +404,7 @@ script_argument_list sa_server_scriptargs_to_list(server_command_info info)
     std::vector<std::pair<std::string, std::string>> args;
 
     if((strings.size() % 2) != 0)
-        return {nullptr, nullptr, 0};
+        return {};
 
     for(int i=0; i < (int)strings.size(); i+=2)
     {
@@ -414,41 +415,38 @@ script_argument_list sa_server_scriptargs_to_list(server_command_info info)
     }
 
     script_argument_list ret;
-    ret.scriptname = cpp_str_to_c(scriptname);
+    ret.scriptname = make_copy(scriptname);
     ret.args = new script_argument[args.size()];
     ret.num = args.size();
 
     for(int i=0; i < (int)args.size(); i++)
     {
-        ret.args[i].key = cpp_str_to_c(args[i].first);
-        ret.args[i].val = cpp_str_to_c(args[i].second);
+        ret.args[i].key = make_copy(args[i].first);
+        ret.args[i].val = make_copy(args[i].second);
     }
 
     return ret;
 }
 
-char* sa_server_scriptargs_invalid_to_script_name(server_command_info info)
+sized_string sa_server_scriptargs_invalid_to_script_name(server_command_info info)
 {
-    if(info.data == nullptr)
-        return nullptr;
+    if(info.data.str == nullptr || info.data.num == 0)
+        return {};
 
-    if(info.length <= 0)
-        return nullptr;
+    if(info.data.str[0] != ' ')
+        return {};
 
-    if(info.data[0] != ' ')
-        return nullptr;
-
-    std::string full(info.data);
+    std::string full = c_str_sized_to_cpp(info.data);
 
     std::string str(full.begin() + 1, full.end());
 
     if(str.size() == 0)
-        return nullptr;
+        return {};
 
-    return cpp_str_to_c(str);
+    return make_copy(str);
 }
 
-char* sa_server_scriptargs_ratelimit_to_script_name(server_command_info info)
+sized_string sa_server_scriptargs_ratelimit_to_script_name(server_command_info info)
 {
-    return cpp_str_to_c(info.data);
+    return make_copy(info.data);
 }
