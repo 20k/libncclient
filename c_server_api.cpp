@@ -73,9 +73,9 @@ bool is_local_command(const std::string& command)
     return false;
 }
 
-int sa_is_local_command(const char* server_msg)
+int sa_is_local_command(sized_view server_msg)
 {
-    return is_local_command(server_msg);
+    return is_local_command(c_str_sized_to_cpp(server_msg));
 }
 
 sized_string sa_default_up_handling(sized_view for_user, sized_view server_msg, sized_view scripts_dir)
