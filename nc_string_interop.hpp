@@ -61,7 +61,7 @@ std::string c_str_sized_to_cpp(sized_view str)
 }
 
 inline
-std::string c_str_sized_consume(sized_string str)
+std::string c_str_consume(sized_string str)
 {
     if(str.str == nullptr)
         return {};
