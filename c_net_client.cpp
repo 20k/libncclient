@@ -2,6 +2,7 @@
 #include "nc_util.hpp"
 #include "socket.hpp"
 #include "nc_string_interop.hpp"
+#include "c_server_api.h"
 
 //#include <crapmud/socket_shared.hpp>
 
@@ -190,6 +191,19 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
                 free_sized_string(auth);
 
                 sd_add_back_write(shared, make_view(auth_str));
+
+                sized_string username = sd_get_user(shared);
+
+                if(username.num > 0)
+                {
+                    sized_string user_command = sa_make_generic_server_command(make_view(username));
+
+                    sd_add_back_write(shared, make_view(user_command));
+
+                    free_sized_string(user_command);
+                }
+
+                free_sized_string(username);
 
                 socket_alive = true;
 
