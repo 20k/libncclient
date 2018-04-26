@@ -196,7 +196,9 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 
                 if(username.num > 0)
                 {
-                    sized_string user_command = sa_make_generic_server_command(make_view(username));
+                    std::string command = "user " + c_str_sized_to_cpp(username);
+
+                    sized_string user_command = sa_make_generic_server_command(make_view(command));
 
                     sd_add_back_write(shared, make_view(user_command));
 
