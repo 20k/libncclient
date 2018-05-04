@@ -48,6 +48,12 @@ extern "C"
         sized_string channel;
     };
 
+    struct tell_info
+    {
+        sized_string user;
+        sized_string msg;
+    };
+
     struct chat_api_info
     {
         chat_info* msgs;
@@ -55,6 +61,9 @@ extern "C"
 
         chat_channel* in_channels;
         int num_in_channels;
+
+        tell_info* tells;
+        int num_tells;
     };
 
     struct script_argument

@@ -214,31 +214,45 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
 
         std::vector<std::string> in_channels = full["channels"].get<std::vector<std::string>>();
 
-        std::vector<std::string> msgs;
-        std::vector<std::string> channels;
+        std::vector<std::string> chat_msgs;
+        std::vector<std::string> chat_channels;
 
-        json data = full["data"];
+        json chat_data = full["data"];
 
-        for(int i=0; i < (int)data.size(); i++)
+        for(int i=0; i < (int)chat_data.size(); i++)
         {
-            json element = data[i];
+            json element = chat_data[i];
 
-            msgs.push_back(element["text"]);
-            channels.push_back(element["channel"]);
+            chat_channels.push_back(element["channel"]);
+            chat_msgs.push_back(element["text"]);
+        }
+
+        std::vector<std::string> tell_users;
+        std::vector<std::string> tell_msgs;
+
+        json tell_data = full["tells"];
+
+        for(int i=0; i < (int)tell_data.size(); i++)
+        {
+            json element = tell_data[i];
+
+            tell_users.push_back(element["user"]);
+            tell_msgs.push_back(element["text"]);
         }
 
         chat_api_info ret = {};
-        ret.num_msgs = channels.size();
+        ret.num_msgs = chat_channels.size();
         ret.num_in_channels = in_channels.size();
+        ret.num_tells = tell_users.size();
 
-        if(channels.size() > 0)
+        if(chat_channels.size() > 0)
         {
             ret.msgs = new chat_info[ret.num_msgs];
 
             for(int i=0; i < ret.num_msgs; i++)
             {
-                ret.msgs[i].channel = make_copy(channels[i]);
-                ret.msgs[i].msg = make_copy(msgs[i]);
+                ret.msgs[i].channel = make_copy(chat_channels[i]);
+                ret.msgs[i].msg = make_copy(chat_msgs[i]);
             }
         }
 
@@ -249,6 +263,17 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
             for(int i=0; i < (int)in_channels.size(); i++)
             {
                 ret.in_channels[i].channel = make_copy(in_channels[i]);
+            }
+        }
+
+        if(tell_users.size() > 0)
+        {
+            ret.tells = new tell_info[tell_users.size()];
+
+            for(int i=0; i < (int)tell_users.size(); i++)
+            {
+                ret.tells[i].msg = make_copy(tell_msgs[i]);
+                ret.tells[i].user = make_copy(tell_users[i]);
             }
         }
 
@@ -281,6 +306,17 @@ void sa_destroy_chat_api_info(chat_api_info info)
         }
 
         delete [] info.in_channels;
+    }
+
+    if(info.num_tells > 0)
+    {
+        for(int i=0; i < info.num_tells; i++)
+        {
+            free_sized_string(info.tells[i].user);
+            free_sized_string(info.tells[i].msg);
+        }
+
+        delete [] info.tells;
     }
 }
 
