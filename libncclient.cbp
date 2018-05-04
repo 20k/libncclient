@@ -49,6 +49,7 @@
 			<Add option="-lmswsock" />
 			<Add option="-lboost_filesystem-mt" />
 		</Linker>
+		<Unit filename="c_all.h" />
 		<Unit filename="c_net_client.cpp" />
 		<Unit filename="c_net_client.h" />
 		<Unit filename="c_server_api.cpp" />
