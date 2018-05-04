@@ -30,7 +30,7 @@ sized_string sa_make_autocomplete_request(sized_view server_msg)
 {
     std::string str = c_str_sized_to_cpp(server_msg);
 
-    return make_copy("client_scriptargs " + str);
+    return make_copy("client_scriptargs_json " + str);
 }
 
 bool is_local_command(const std::string& command)
@@ -160,9 +160,9 @@ server_command_info sa_server_response_to_info(sized_view server_response)
 
     std::string command_str = "command ";
     std::string chat_api = "chat_api_json ";
-    std::string scriptargs = "server_scriptargs ";
-    std::string invalid_str = "server_scriptargs_invalid";
-    std::string ratelimit_str = "server_scriptargs_ratelimit ";
+    std::string scriptargs = "server_scriptargs_json ";
+    std::string invalid_str = "server_scriptargs_invalid_json";
+    std::string ratelimit_str = "server_scriptargs_ratelimit_json ";
 
     std::vector<std::pair<server_command_type, std::string>> dat;
 
@@ -305,66 +305,42 @@ script_argument_list sa_server_scriptargs_to_list(server_command_info info)
 
     std::string in = c_str_sized_to_cpp(info.data);
 
-    ///TODO: Make all server/client communication use this format
-    std::string_view view(&in[0]);
-
-    //view.remove_prefix(std::min(view.find_first_of(" ")+1, view.size()));
-
-    std::vector<std::string> strings;
-
-    while(view.size() > 0)
+    try
     {
-        auto found = view.find(" ");
+        using json = nlohmann::json;
 
-        if(found == std::string_view::npos)
-            break;
+        json data = json::parse(in);
 
-        std::string_view num(view.data(), found);
+        ///script
+        ///keys
+        ///vals
 
-        std::string len(num);
+        std::string name = data["script"].get<std::string>();
+        std::vector<std::string> keys = data["keys"].get<std::vector<std::string>>();
+        std::vector<std::string> vals = data["vals"].get<std::vector<std::string>>();
 
-        int ilen = stoi(len);
+        if(keys.size() != vals.size())
+        {
+            throw std::runtime_error("keys.size() != vals.size()");
+        }
 
-        std::string dat(view.substr(len.size() + 1, ilen));
+        script_argument_list ret;
+        ret.scriptname = make_copy(name);
+        ret.args = new script_argument[keys.size()];
+        ret.num = keys.size();
 
-        strings.push_back(dat);
+        for(int i=0; i < (int)keys.size(); i++)
+        {
+            ret.args[i].key = make_copy(keys[i]);
+            ret.args[i].val = make_copy(vals[i]);
+        }
 
-        ///"len" + " " + len_bytes + " "
-        view.remove_prefix(len.size() + 2 + ilen);
+        return ret;
     }
-
-    if(strings.size() == 0)
+    catch(...)
+    {
         return {};
-
-    std::string scriptname = strings[0];
-
-    strings.erase(strings.begin());
-
-    std::vector<std::pair<std::string, std::string>> args;
-
-    if((strings.size() % 2) != 0)
-        return {};
-
-    for(int i=0; i < (int)strings.size(); i+=2)
-    {
-        std::string key = strings[i];
-        std::string arg = strings[i + 1];
-
-        args.push_back({key, arg});
     }
-
-    script_argument_list ret;
-    ret.scriptname = make_copy(scriptname);
-    ret.args = new script_argument[args.size()];
-    ret.num = args.size();
-
-    for(int i=0; i < (int)args.size(); i++)
-    {
-        ret.args[i].key = make_copy(args[i].first);
-        ret.args[i].val = make_copy(args[i].second);
-    }
-
-    return ret;
 }
 
 sized_string sa_server_scriptargs_invalid_to_script_name(server_command_info info)
