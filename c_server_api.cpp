@@ -351,17 +351,42 @@ sized_string sa_server_scriptargs_invalid_to_script_name(server_command_info inf
     if(info.data.str[0] != ' ')
         return {};
 
-    std::string full = c_str_sized_to_cpp(info.data);
-
-    std::string str(full.begin() + 1, full.end());
+    std::string str = c_str_sized_to_cpp(info.data);
 
     if(str.size() == 0)
         return {};
 
-    return make_copy(str);
+    ///remove front ' '
+    str.erase(str.begin());
+
+    try
+    {
+        using json = nlohmann::json;
+
+        json data = json::parse(str);
+
+        return make_copy(data["script"].get<std::string>());
+    }
+    catch(...)
+    {
+        return {};
+    }
 }
 
 sized_string sa_server_scriptargs_ratelimit_to_script_name(server_command_info info)
 {
-    return make_copy(info.data);
+    std::string str = c_str_sized_to_cpp(info.data);
+
+    try
+    {
+        using json = nlohmann::json;
+
+        json data = json::parse(str);
+
+        return make_copy(data["script"].get<std::string>());
+    }
+    catch(...)
+    {
+        return {};
+    };
 }
