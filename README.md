@@ -1,4 +1,4 @@
-This is the client lib for net_code, the official client uses everything here and so its guaranteed to work (as well as the official client
+This is the client lib for net_code, the official client uses everything here and so its guaranteed to work (as well as the official client does)
 
 # Concepts
 
