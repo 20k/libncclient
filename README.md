@@ -91,7 +91,8 @@ There are 4 kinds of server request:
 3. Autocomplete
 4. Chat api
 
-``````
+```js
+```
 
 1. Polling should be performed every x seconds (preferably 1s) with sa_do_poll_server(shared);
 
