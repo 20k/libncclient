@@ -163,11 +163,15 @@ free_sized_string(current_user);
 
 There are 5 kinds of server response:
 
-server_command_command, -> response to a generic command
-server_command_chat_api, -> response to a client_poll
-server_command_server_scriptargs, -> response to a valid script argument request
-server_command_server_scriptargs_invalid, -> response to an invalid script argument request
-server_command_server_scriptargs_ratelimit, -> response if you are requesting too many script arguments per second
+1. server_command_command, -> response to a generic command
+
+2. server_command_chat_api, -> response to a client_poll
+
+3. server_command_server_scriptargs, -> response to a valid script argument request
+
+4. server_command_server_scriptargs_invalid, -> response to an invalid script argument request
+
+5. server_command_server_scriptargs_ratelimit, -> response if you are requesting too many script arguments per second
 
 To use the server response parsing abilities, this should work as follows:
 
