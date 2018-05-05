@@ -72,7 +72,7 @@ sd_add_back_write(shared, {some_string, length_of_some_string});
 
 ### User and auth
 
-Currently, the queue deals with containing user and auth information, as these are partially internally managed. Auth data should currently always be stored in a file named key.key, with the raw binary data in
+Currently, the queue deals with containing user and auth information, as these are partially internally managed. Auth data should currently always be stored in a file named key.key, which contains raw binary
 
 To set the currently running user, use sd_set_user(shared, {user_name, length_of_user_name}). To set auth data use sd_set_auth(shared, {auth_data, length_of_auth_data}). It is important to remember that auth data (and other strings) may contain nulls, you must not assume they are null terminated
 
