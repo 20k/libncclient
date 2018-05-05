@@ -254,6 +254,8 @@ if(sd_has_front_read(shared))
 		sized_string name = sa_server_scriptargs_invalid_to_script_name(command_info);
 		
 		///should register name here as not being a valid name so we dont rerequest it
+		
+		free_sized_string(name);
 	}
 	
 	if(command.type == server_command_server_scriptargs_ratelimit)
@@ -262,6 +264,8 @@ if(sd_has_front_read(shared))
 		
 		///name is the name of the script here that the server did not process as we were ratelimited
 		///retry name after a delay
+		
+		free_sized_string(name);
 	}
 	
 	sa_destroy_server_command_info(command_info);
