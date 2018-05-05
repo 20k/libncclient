@@ -1,16 +1,16 @@
 This is the client lib for net_code, the official client uses everything here and so its guaranteed to work (as well as the official client
 
-#Concepts
+# Concepts
 
 There are two kinds of strings. Owning and non owning - owning strings are a sized_string, and non owning strings are a sized_view. You are expected to manage the lifetime of a sized string by using free_sized_string on sized strings returned by the api
 
 The API is guaranteed not to take ownership or otherwise do anything unexpected with a sized_view
 
-##Socket
+## Socket
 
 The client totally hides away the implementation of the underlying socket. You do not need to deal with websockets whatsoever here
 
-##Queue
+## Queue
 
 The main way of interacting with the server is through the c_shared_data class. This represents a read and write queue with the server. It also contains auth and user data, which much be set manually by the application
 
@@ -70,7 +70,7 @@ Or more simply
 sd_add_back_write(shared, {some_string, length_of_some_string});
 ```
 
-###User and auth
+### User and auth
 
 Currently, the queue deals with containing user and auth information, as these are partially internally managed. Auth data should currently always be stored in a file named key.key, with the raw binary data in
 
@@ -78,11 +78,11 @@ To set the currently running user, use sd_set_user(shared, {user_name, length_of
 
 You only need to set auth data once on startup, if it exists, as shown in setup. It is otherwise managed automatically
 
-##API
+## API
 
 One major feature of libncclient is the ability to hide the entire server api from you, which is accessible from c_server_api. Usage of this is optional, but the underlying communication format is liable to change
 
-###Creating Requests
+### Creating Requests
 
 There are 4 kinds of server request:
 
@@ -132,7 +132,7 @@ sd_add_back_write(shared, some_request);
 free_sized_string(some_request);
 ```
 
-####Caveats
+#### Caveats
 
 When the user types a command, sa_is_local_command can be used to check if the official client would handle that command without sending anything to the server, eg the # command, or #edit. However the ability to execute these commands is currently not in the lib
 
@@ -156,7 +156,7 @@ free_sized_string(up_handled);
 free_sized_string(current_user);
 ```
 
-###Parsing Responses
+### Parsing Responses
 
 There are 5 kinds of server response:
 
