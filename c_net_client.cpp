@@ -1,6 +1,8 @@
 #include "c_net_client.h"
 #include "nc_util.hpp"
 #include "socket.hpp"
+#include "nc_string_interop.hpp"
+#include "c_server_api.h"
 
 //#include <crapmud/socket_shared.hpp>
 
@@ -22,49 +24,6 @@ namespace
 
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
-
-std::string handle_up(c_shared_data shared, const std::string& unknown_command)
-{
-    std::string up = "client_command #up ";
-    std::string up_es6 = "client_command #up_es6 ";
-    std::string dry = "client_command #dry ";
-
-    std::vector<std::string> strings = no_ss_split(unknown_command, " ");
-
-    if((starts_with(unknown_command, up) || starts_with(unknown_command, dry)) && strings.size() == 3)
-    {
-        std::string name = strings[2];
-
-        char* c_user = sd_get_user(shared);
-        std::string hardcoded_user(c_user);
-        free_string(c_user);
-
-        std::string diskname = "./scripts/" + hardcoded_user + "." + name + ".es5.js";
-        std::string diskname_es6 = "./scripts/" + hardcoded_user + "." + name + ".js";
-
-        std::string comm = up;
-
-        if(starts_with(unknown_command, dry))
-            comm = dry;
-
-        std::string data = "";
-
-        if(file_exists(diskname))
-            data = read_file(diskname);
-
-        if(file_exists(diskname_es6))
-        {
-            data = read_file(diskname_es6);
-            comm = up_es6;
-        }
-
-        std::string final_command = comm + name + " " + data;
-
-        return final_command;
-    }
-
-    return unknown_command;
-}
 
 volatile static bool socket_alive = false;
 
@@ -116,11 +75,9 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
 
             if(sd_has_front_write(shared))
             {
-                char* c_write = sd_get_front_write(shared);
-                std::string next_command(c_write);
-                free_string(c_write);
-
-                next_command = handle_up(shared, next_command);
+                sized_string c_write = sd_get_front_write(shared);
+                std::string next_command = c_str_sized_to_cpp(c_write);
+                free_sized_string(c_write);
 
                 if(ctx.sock->write(next_command))
                 {
@@ -155,7 +112,7 @@ void check_auth(c_shared_data shared, const std::string& str)
         {
             write_all_bin("key.key", key);
 
-            sd_set_auth(shared, key.c_str());
+            sd_set_auth(shared, make_view(key));
         }
         else
         {
@@ -189,7 +146,7 @@ void handle_async_read(c_shared_data shared, shared_context& ctx)
             std::string next_command = ctx.sock->get_read();
 
             check_auth(shared, next_command);
-            sd_add_back_read(shared, next_command.c_str());
+            sd_add_back_read(shared, make_view(next_command));
         }
         catch(...)
         {
@@ -223,17 +180,32 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 
                 std::cout << "Try Reconnect" << std::endl;
 
-                sd_add_back_read(shared, "Connecting...");
+                sd_add_back_read(shared, make_view_from_raw("Connecting..."));
 
                 ctx.connect(host, port);
 
-                sd_add_back_read(shared, "`LConnected`");
+                sd_add_back_read(shared, make_view_from_raw("`LConnected`"));
 
-                char* auth = sd_get_auth(shared);
-                std::string auth_str = "client_command auth client " + std::string(auth);
-                free_string(auth);
+                sized_string auth = sd_get_auth(shared);
+                std::string auth_str = "client_command auth client " + c_str_sized_to_cpp(auth);
+                free_sized_string(auth);
 
-                sd_add_back_write(shared, auth_str.c_str());
+                sd_add_back_write(shared, make_view(auth_str));
+
+                sized_string username = sd_get_user(shared);
+
+                if(username.num > 0)
+                {
+                    std::string command = "user " + c_str_sized_to_cpp(username);
+
+                    sized_string user_command = sa_make_generic_server_command(make_view(command));
+
+                    sd_add_back_write(shared, make_view(user_command));
+
+                    free_sized_string(user_command);
+                }
+
+                free_sized_string(username);
 
                 socket_alive = true;
 
@@ -241,7 +213,7 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
             }
             catch(...)
             {
-                sd_add_back_read(shared, "`DConnection to the server failed`");
+                sd_add_back_read(shared, make_view_from_raw("`DConnection to the server failed`"));
 
                 std::cout << "Server down" << std::endl;
                 sf::sleep(sf::milliseconds(5000));
@@ -259,14 +231,6 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 }
 }
 
-/*void test_http_client(c_shared_data shared)
-{
-    shared_context* ctx = new shared_context();
-
-    std::thread(handle_async_read, shared, std::ref(*ctx)).detach();
-    std::thread(handle_async_write, shared, std::ref(*ctx)).detach();
-    std::thread(watchdog, shared, std::ref(*ctx)).detach();
-}*/
 
 void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
 {
@@ -279,13 +243,3 @@ void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
     std::thread(handle_async_write, data, std::ref(*ctx)).detach();
     std::thread(watchdog, data, std::ref(*ctx), hip, hpo).detach();
 }
-
-/*c_net_client nc_alloc()
-{
-    return new net_client;
-}
-
-void nc_destroy(c_net_client data)
-{
-    delete data;
-}*/

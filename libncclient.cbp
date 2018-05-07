@@ -29,29 +29,34 @@
 				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O2" />
-					<Add option="-Wall" />
+					<Add option="-g" />
 				</Compiler>
-				<Linker>
-					<Add option="-s" />
-				</Linker>
 				<ExtraCommands>
 					<Add after="Release.bat" />
 					<Mode after="always" />
 				</ExtraCommands>
 			</Target>
 		</Build>
+		<Compiler>
+			<Add option="-pg" />
+			<Add option="-std=c++17" />
+		</Compiler>
 		<Linker>
+			<Add option="-pg -lgmon" />
 			<Add option="-lsfml-system" />
 			<Add option="-lws2_32" />
 			<Add option="-lboost_system-mt" />
 			<Add option="-lmswsock" />
 			<Add option="-lboost_filesystem-mt" />
 		</Linker>
+		<Unit filename="c_all.h" />
 		<Unit filename="c_net_client.cpp" />
 		<Unit filename="c_net_client.h" />
+		<Unit filename="c_server_api.cpp" />
+		<Unit filename="c_server_api.h" />
 		<Unit filename="c_shared_data.cpp" />
 		<Unit filename="c_shared_data.h" />
-		<Unit filename="main.cpp" />
+		<Unit filename="nc_string_interop.hpp" />
 		<Unit filename="nc_util.hpp" />
 		<Unit filename="socket.hpp" />
 		<Extensions>

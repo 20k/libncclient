@@ -5,6 +5,7 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
+#include <algorithm>
 
 inline
 std::string read_file(const std::string& file)
@@ -31,7 +32,17 @@ void write_all_bin(const std::string& fname, const std::string& str)
 }
 
 inline
-bool file_exists (const std::string& name)
+std::string read_file_bin(const std::string& file)
+{
+    std::ifstream t(file, std::ios::binary);
+    std::string str((std::istreambuf_iterator<char>(t)),
+                     std::istreambuf_iterator<char>());
+
+    return str;
+}
+
+inline
+bool file_exists(const std::string& name)
 {
     std::ifstream f(name.c_str());
     return f.good();
@@ -256,6 +267,39 @@ std::string get_host_from_fullname(const std::string& in)
         return "";
 
     return found[0];
+}
+
+inline
+char* cpp_str_to_c(const std::string& str)
+{
+    int len = str.size() + 1;
+
+    char* ptr = new char[len]();
+
+    for(int i=0; i < (int)str.size(); i++)
+    {
+        ptr[i] = str[i];
+    }
+
+    return ptr;
+}
+
+inline
+std::string c_str_to_cpp(const char* in)
+{
+    if(in == nullptr)
+        return std::string();
+
+    return std::string(in);
+}
+
+inline
+std::string c_str_to_cpp(const char* in, int len)
+{
+    if(in == nullptr)
+        return std::string();
+
+    return std::string(in, len);
 }
 
 #endif // NC_UTIL_HPP_INCLUDED
