@@ -223,6 +223,18 @@ std::string make_success_col(const std::string& in)
 }
 
 inline
+std::string make_key_col(const std::string& in)
+{
+    return "`F" + in + "`";
+}
+
+inline
+std::string make_val_col(const std::string& in)
+{
+    return "`P" + in + "`";
+}
+
+inline
 std::string string_to_colour(const std::string& in)
 {
     if(in == "core")
