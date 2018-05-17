@@ -206,7 +206,7 @@ sized_string sa_command_to_human_readable(server_command_info info)
     return make_copy(cp);
 }
 
-realtime_info sa_command_realtime_to_realtime_info(server_command_info info)
+realtime_info sa_command_realtime_to_info(server_command_info info)
 {
     realtime_info ret;
 
