@@ -1,8 +1,11 @@
 #ifndef C_SHARED_DATA_H_INCLUDED
 #define C_SHARED_DATA_H_INCLUDED
 
+#ifdef __cplusplus
 extern "C"
 {
+#endif
+
     struct shared_data;
 
     typedef shared_data* c_shared_data;
@@ -47,6 +50,8 @@ extern "C"
 
     void free_string(char*);
     void free_sized_string(sized_string str);
+#ifdef __cplusplus
 }
+#endif
 
 #endif // C_SHARED_DATA_H_INCLUDED

@@ -3,8 +3,11 @@
 
 #include "c_shared_data.h"
 
+#ifdef __cplusplus
 extern "C"
 {
+#endif
+
     struct net_client;
     typedef net_client* c_net_client;
 
@@ -14,6 +17,9 @@ extern "C"
     //void nc_start(c_net_client data);
 
     void nc_start(c_shared_data data, const char* host_ip, const char* host_port);
+
+#ifdef __cplusplus
 }
+#endif
 
 #endif // C_NET_CLIENT_H_INCLUDED

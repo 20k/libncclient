@@ -3,8 +3,11 @@
 
 #include "c_shared_data.h"
 
+#ifdef __cplusplus
 extern "C"
 {
+#endif
+
     sized_string sa_make_chat_command(sized_view chat_channel, sized_view chat_msg);
     ///does not handle #up
     sized_string sa_make_generic_server_command(sized_view server_msg);
@@ -28,6 +31,7 @@ extern "C"
         server_command_server_scriptargs,
         server_command_server_scriptargs_invalid,
         server_command_server_scriptargs_ratelimit,
+        server_command_command_realtime,
         error_invalid_response,
     };
 
@@ -35,6 +39,12 @@ extern "C"
     {
         server_command_type type;
         sized_string data;
+    };
+
+    struct realtime_info
+    {
+        int id;
+        sized_string msg;
     };
 
     struct chat_info
@@ -80,6 +90,7 @@ extern "C"
     };
 
     void sa_destroy_server_command_info(server_command_info info);
+    void sa_destroy_realtime_info(realtime_info info);
     void sa_destroy_chat_api_info(chat_api_info info);
     void sa_destroy_script_argument_list(script_argument_list argl);
 
@@ -87,6 +98,8 @@ extern "C"
 
     ///server_command_command
     sized_string sa_command_to_human_readable(server_command_info info);
+
+    realtime_info sa_command_realtime_to_info(server_command_info info);
 
     ///server_command_chat_api
     chat_api_info sa_chat_api_to_info(server_command_info info);
@@ -100,6 +113,9 @@ extern "C"
 
     ///server_command_server_scriptargs_ratelimit
     sized_string sa_server_scriptargs_ratelimit_to_script_name(server_command_info info);
+
+#ifdef __cplusplus
 }
+#endif
 
 #endif // C_SERVER_API_H_INCLUDED
