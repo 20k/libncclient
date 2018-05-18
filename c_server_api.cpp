@@ -145,6 +145,31 @@ void sa_do_autocomplete_request(c_shared_data data, sized_view scriptname)
     free_sized_string(req);
 }
 
+void sa_do_terminate_script(c_shared_data data)
+{
+    std::string command = "client_terminate_scripts";
+
+    sd_add_back_write(data, make_view(command));
+}
+
+void sa_do_send_keystrokes_to_script(c_shared_data data, int script_id, sized_view keystrokes)
+{
+    std::string command = "client_script_keystrokes ";
+
+    std::string keys = c_str_sized_to_cpp(keystrokes);
+
+    using nlohmann::json;
+
+    json j;
+
+    j["id"] = script_id;
+    j["keys"] = keys;
+
+    std::string full_command = command + j.dump();
+
+    sd_add_back_write(data, make_view(full_command));
+}
+
 void sa_destroy_server_command_info(server_command_info info)
 {
     if(info.data.num == 0)
@@ -153,12 +178,18 @@ void sa_destroy_server_command_info(server_command_info info)
     free_sized_string(info.data);
 }
 
+void sa_destroy_realtime_info(realtime_info info)
+{
+    free_sized_string(info.msg);
+}
+
 server_command_info sa_server_response_to_info(sized_view server_response)
 {
     if(server_response.str == nullptr || server_response.num <= 0)
         return {error_invalid_response, {}};
 
     std::string command_str = "command ";
+    std::string realtime_str = "command_realtime_json ";
     std::string chat_api = "chat_api_json ";
     std::string scriptargs = "server_scriptargs_json ";
     std::string invalid_str = "server_scriptargs_invalid_json";
@@ -167,6 +198,7 @@ server_command_info sa_server_response_to_info(sized_view server_response)
     std::vector<std::pair<server_command_type, std::string>> dat;
 
     dat.push_back({server_command_command, command_str});
+    dat.push_back({server_command_command_realtime, realtime_str});
     dat.push_back({server_command_chat_api, chat_api});
     dat.push_back({server_command_server_scriptargs, scriptargs});
     dat.push_back({server_command_server_scriptargs_invalid, invalid_str});
@@ -197,6 +229,32 @@ sized_string sa_command_to_human_readable(server_command_info info)
     std::string cp = c_str_sized_to_cpp(info.data);
 
     return make_copy(cp);
+}
+
+realtime_info sa_command_realtime_to_info(server_command_info info)
+{
+    realtime_info ret;
+
+    std::string str = c_str_sized_to_cpp(info.data);
+
+    using json = nlohmann::json;
+
+    try
+    {
+        json j = json::parse(str);
+
+        std::string msg = j["msg"];
+        int id = j["id"];
+
+        ret.id = id;
+        ret.msg = make_copy(msg);
+
+        return ret;
+    }
+    catch(...)
+    {
+        return {};
+    }
 }
 
 chat_api_info sa_chat_api_to_info(server_command_info info)
