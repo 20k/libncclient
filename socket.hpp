@@ -139,7 +139,15 @@ struct websock_socket : socket_interface
     boost::beast::multi_buffer mbuffer;
     boost::system::error_code lec;
 
-    websock_socket(tcp::socket&& sock) : ws(std::move(sock)) {ws.accept();}
+    websock_socket(tcp::socket&& sock) : ws(std::move(sock))
+    {
+        boost::beast::websocket::permessage_deflate opt;
+        //opt.client_enable = true; // for clients
+        opt.server_enable = true; // for servers
+        ws.set_option(opt);
+
+        ws.accept();
+    }
 
     websock_socket(boost::asio::io_context& ioc) : ws{ioc} {}
 
@@ -199,7 +207,13 @@ struct websock_socket_client : websock_socket
 {
     tcp::resolver resolver;
 
-    websock_socket_client(boost::asio::io_context& ioc) : websock_socket(ioc), resolver{ioc} {}
+    websock_socket_client(boost::asio::io_context& ioc) : websock_socket(ioc), resolver{ioc}
+    {
+        boost::beast::websocket::permessage_deflate opt;
+        opt.client_enable = true; // for clients
+        //opt.server_enable = true; // for servers
+        ws.set_option(opt);
+    }
 };
 
 #endif // SOCKET_SHARED_HPP_INCLUDED
