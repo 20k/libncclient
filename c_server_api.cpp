@@ -152,6 +152,24 @@ void sa_do_terminate_script(c_shared_data data)
     sd_add_back_write(data, make_view(command));
 }
 
+void sa_do_send_keystrokes_to_script(c_shared_data data, int script_id, sized_view keystrokes)
+{
+    std::string command = "client_script_keystrokes ";
+
+    std::string keys = c_str_sized_to_cpp(keystrokes);
+
+    using nlohmann::json;
+
+    json j;
+
+    j["id"] = script_id;
+    j["keys"] = keys;
+
+    std::string full_command = command + j.dump();
+
+    sd_add_back_write(data, make_view(full_command));
+}
+
 void sa_destroy_server_command_info(server_command_info info)
 {
     if(info.data.num == 0)
