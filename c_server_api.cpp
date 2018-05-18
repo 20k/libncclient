@@ -145,6 +145,13 @@ void sa_do_autocomplete_request(c_shared_data data, sized_view scriptname)
     free_sized_string(req);
 }
 
+void sa_do_terminate_script(c_shared_data data)
+{
+    std::string command = "client_terminate_scripts";
+
+    sd_add_back_write(data, make_view(command));
+}
+
 void sa_destroy_server_command_info(server_command_info info)
 {
     if(info.data.num == 0)

@@ -23,6 +23,7 @@ extern "C"
 
     void sa_do_poll_server(c_shared_data data);
     void sa_do_autocomplete_request(c_shared_data data, sized_view scriptname);
+    void sa_do_terminate_script(c_shared_data data);
 
     enum server_command_type
     {
