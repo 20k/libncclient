@@ -145,11 +145,28 @@ void sa_do_autocomplete_request(c_shared_data data, sized_view scriptname)
     free_sized_string(req);
 }
 
-void sa_do_terminate_script(c_shared_data data)
+void sa_do_terminate_all_scripts(c_shared_data data)
 {
     std::string command = "client_terminate_scripts";
 
-    sd_add_back_write(data, make_view(command));
+    using nlohmann::json;
+
+    json j;
+    j["id"] = -1;
+
+    sd_add_back_write(data, make_view(command + " " + j.dump()));
+}
+
+void sa_do_terminate_script(c_shared_data data, int script_id)
+{
+    std::string command = "client_terminate_scripts";
+
+    using nlohmann::json;
+
+    json j;
+    j["id"] = script_id;
+
+    sd_add_back_write(data, make_view(command + " " + j.dump()));
 }
 
 void sa_do_send_keystrokes_to_script(c_shared_data data, int script_id, sized_view keystrokes)
