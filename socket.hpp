@@ -143,8 +143,11 @@ struct websock_socket : socket_interface
     {
         boost::beast::websocket::permessage_deflate opt;
         //opt.client_enable = true; // for clients
+
+        #ifdef WS_COMPRESSION
         opt.server_enable = true; // for servers
         ws.set_option(opt);
+        #endif // COMPRESSION
 
         ws.accept();
     }
@@ -210,9 +213,12 @@ struct websock_socket_client : websock_socket
     websock_socket_client(boost::asio::io_context& ioc) : websock_socket(ioc), resolver{ioc}
     {
         boost::beast::websocket::permessage_deflate opt;
+
+        #ifdef WS_COMPRESSION
         opt.client_enable = true; // for clients
         //opt.server_enable = true; // for servers
         ws.set_option(opt);
+        #endif // WS_COMPRESSION
     }
 };
 
