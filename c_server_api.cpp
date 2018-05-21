@@ -283,6 +283,24 @@ realtime_info sa_command_realtime_to_info(server_command_info info)
             ret.should_close = 0;
         }
 
+        if(j.find("width") != j.end())
+        {
+            ret.width = j["width"];
+        }
+        else
+        {
+            ret.width = 0;
+        }
+
+        if(j.find("height") != j.end())
+        {
+            ret.height = j["height"];
+        }
+        else
+        {
+            ret.height = 0;
+        }
+
         return ret;
     }
     catch(...)
