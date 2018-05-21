@@ -133,6 +133,8 @@ struct http_socket : socket_interface
     }
 };
 
+//#define WS_COMPRESSION
+
 struct websock_socket : socket_interface
 {
     boost::beast::websocket::stream<tcp::socket> ws;

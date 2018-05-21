@@ -48,6 +48,7 @@ extern "C"
     {
         int id;
         sized_string msg;
+        int should_close;
     };
 
     struct chat_info

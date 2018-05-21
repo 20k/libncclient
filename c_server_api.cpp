@@ -260,11 +260,28 @@ realtime_info sa_command_realtime_to_info(server_command_info info)
     {
         json j = json::parse(str);
 
-        std::string msg = j["msg"];
         int id = j["id"];
 
         ret.id = id;
-        ret.msg = make_copy(msg);
+
+        if(j.find("msg") != j.end())
+        {
+            std::string msg = j["msg"];
+            ret.msg = make_copy(msg);
+        }
+        else
+        {
+            ret.msg = make_copy("");
+        }
+
+        if(j.find("close") != j.end())
+        {
+            ret.should_close = j["close"];
+        }
+        else
+        {
+            ret.should_close = 0;
+        }
 
         return ret;
     }
