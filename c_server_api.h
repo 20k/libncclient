@@ -25,7 +25,10 @@ extern "C"
     void sa_do_autocomplete_request(c_shared_data data, sized_view scriptname);
     void sa_do_terminate_all_scripts(c_shared_data data);
     void sa_do_terminate_script(c_shared_data data, int script_id);
-    void sa_do_send_keystrokes_to_script(c_shared_data data, int script_id, sized_view* keystrokes, int num_keystrokes);
+    void sa_do_send_keystrokes_to_script(c_shared_data data, int script_id,
+                                         sized_view* keystrokes, int num_keystrokes,
+                                         sized_view* on_pressed, int num_pressed,
+                                         sized_view* on_released, int num_released);
 
     enum server_command_type
     {
