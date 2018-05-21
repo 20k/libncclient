@@ -169,18 +169,23 @@ void sa_do_terminate_script(c_shared_data data, int script_id)
     sd_add_back_write(data, make_view(command + " " + j.dump()));
 }
 
-void sa_do_send_keystrokes_to_script(c_shared_data data, int script_id, sized_view keystrokes)
+void sa_do_send_keystrokes_to_script(c_shared_data data, int script_id, sized_view* keystrokes, int num_keystrokes)
 {
     std::string command = "client_script_keystrokes ";
 
-    std::string keys = c_str_sized_to_cpp(keystrokes);
-
     using nlohmann::json;
+
+    std::vector<std::string> keys;
+
+    for(int i=0; i < num_keystrokes; i++)
+    {
+        keys.push_back(c_str_sized_to_cpp(keystrokes[i]));
+    }
 
     json j;
 
     j["id"] = script_id;
-    j["keys"] = keys;
+    j["input_keys"] = keys;
 
     std::string full_command = command + j.dump();
 
