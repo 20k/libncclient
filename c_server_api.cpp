@@ -201,8 +201,8 @@ void sa_do_send_keystrokes_to_script(c_shared_data data, int script_id,
 
     j["id"] = script_id;
     j["input_keys"] = keys;
-    j["released_keys"] = pressed;
-    j["pressed_keys"] = released;
+    j["released_keys"] = released;
+    j["pressed_keys"] = pressed;
 
     std::string full_command = command + j.dump();
 
