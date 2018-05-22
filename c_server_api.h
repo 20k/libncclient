@@ -30,6 +30,9 @@ extern "C"
                                          sized_view* on_pressed, int num_pressed,
                                          sized_view* on_released, int num_released);
 
+    void sa_do_send_script_info(c_shared_data data, int script_id,
+                                int width, int height);
+
     enum server_command_type
     {
         server_command_command,
