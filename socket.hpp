@@ -133,7 +133,7 @@ struct http_socket : socket_interface
     }
 };
 
-#define WS_COMPRESSION
+//#define WS_COMPRESSION
 
 struct websock_socket : socket_interface
 {
