@@ -38,11 +38,9 @@
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="-pg" />
 			<Add option="-std=c++17" />
 		</Compiler>
 		<Linker>
-			<Add option="-pg -lgmon" />
 			<Add option="-lsfml-system" />
 			<Add option="-lws2_32" />
 			<Add option="-lboost_system-mt" />
