@@ -8,6 +8,18 @@ extern "C"
 {
 #endif
 
+    struct key_state
+    {
+        enum state
+        {
+            UP = 0,
+            DOWN = 1,
+        };
+
+        state st;
+        sized_string key;
+    };
+
     sized_string sa_make_chat_command(sized_view chat_channel, sized_view chat_msg);
     ///does not handle #up
     sized_string sa_make_generic_server_command(sized_view server_msg);
@@ -29,6 +41,9 @@ extern "C"
                                          sized_view* keystrokes, int num_keystrokes,
                                          sized_view* on_pressed, int num_pressed,
                                          sized_view* on_released, int num_released);
+
+    void sa_do_send_key_event_stream_to_script(c_shared_data data, int script_id,
+                                               key_state* events, int num_events);
 
     void sa_do_update_mouse_to_script(c_shared_data data, int script_id,
                                       float mousewheel_x, float mousewheel_y,
