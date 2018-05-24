@@ -54,6 +54,9 @@
 				</ExtraCommands>
 			</Target>
 		</Build>
+		<VirtualTargets>
+			<Add alias="All" targets="Release;Release32bit;" />
+		</VirtualTargets>
 		<Compiler>
 			<Add option="-std=c++17" />
 		</Compiler>
