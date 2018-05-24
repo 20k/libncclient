@@ -12,6 +12,7 @@ namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 namespace websocket = boost::beast::websocket;
 
 // Report a failure
+inline
 void
 fail(boost::system::error_code ec, char const* what)
 {
