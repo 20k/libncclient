@@ -36,6 +36,23 @@
 					<Mode after="always" />
 				</ExtraCommands>
 			</Target>
+			<Target title="Release32bit">
+				<Option output="bin/Release32/ncclient32" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/Release32" />
+				<Option object_output="obj/Release32/" />
+				<Option type="3" />
+				<Option compiler="gcc-32bit" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-g" />
+				</Compiler>
+				<ExtraCommands>
+					<Add after="Release32bit.bat" />
+					<Mode after="always" />
+				</ExtraCommands>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-std=c++17" />
