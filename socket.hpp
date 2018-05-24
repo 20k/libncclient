@@ -135,6 +135,7 @@ struct http_socket : socket_interface
 };
 
 #define WS_COMPRESSION
+//#define NAGLE
 
 struct websock_socket : socket_interface
 {
@@ -144,8 +145,10 @@ struct websock_socket : socket_interface
 
     websock_socket(tcp::socket&& sock) : ws(std::move(sock))
     {
+        #ifdef NAGLE
         boost::asio::ip::tcp::no_delay nagle(true);
         ws.next_layer().set_option(nagle);
+        #endif // NAGLE
 
         boost::beast::websocket::permessage_deflate opt;
         //opt.client_enable = true; // for clients
@@ -218,8 +221,10 @@ struct websock_socket_client : websock_socket
 
     websock_socket_client(boost::asio::io_context& ioc) : websock_socket(ioc), resolver{ioc}
     {
+        #ifdef NAGLE
         boost::asio::ip::tcp::no_delay nagle(true);
         ws.next_layer().set_option(nagle);
+        #endif // NAGLE
 
         boost::beast::websocket::permessage_deflate opt;
 
