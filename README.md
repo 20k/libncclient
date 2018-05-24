@@ -398,9 +398,14 @@ For the following structs, do not destroy the sized_strings, simply destroy the 
 The following destroy functions should be called whenever you've finished manipulating the corresponding object to prevent memory leaks
 
 `void sa_destroy_server_command_info(server_command_info info)` -> destroyed a server_command_info object
+
 `void sa_destroy_realtime_info(realtime_info info)` -> destroyes a realtime_info object
+
 `void sa_destroy_chat_api_info(chat_api_info info)` -> destroys a chat_api_info object
+
 `void sa_destroy_script_argument_list(script_argument_list argl)` -> destroys a script_argument_list object
+
+-
 
 `server_command_info sa_server_response_to_info(sized_view server_response)` -> converts a raw server response into a server command info type, which must be destroyed
 
