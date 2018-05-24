@@ -405,7 +405,7 @@ The following destroy functions should be called whenever you've finished manipu
 
 `void sa_destroy_script_argument_list(script_argument_list argl)` -> destroys a script_argument_list object
 
--
+The following functions all must have their return types freed or destroyed in some form
 
 `server_command_info sa_server_response_to_info(sized_view server_response)` -> converts a raw server response into a server command info type, which must be destroyed
 
