@@ -51,6 +51,10 @@ struct shared_context
         auto const results = tsock->resolver.resolve(host, port);
 
         boost::asio::connect(tsock->ws.next_layer(), results.begin(), results.end());
+
+        boost::asio::ip::tcp::no_delay nagle(true);
+        tsock->ws.next_layer().set_option(nagle);
+
         tsock->ws.handshake(host, "/");
         tsock->ws.text(false);
 
