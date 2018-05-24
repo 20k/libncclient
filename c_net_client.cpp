@@ -52,8 +52,11 @@ struct shared_context
 
         boost::asio::connect(tsock->ws.next_layer(), results.begin(), results.end());
 
+        #define NAGLE
+        #ifdef NAGLE
         boost::asio::ip::tcp::no_delay nagle(true);
         tsock->ws.next_layer().set_option(nagle);
+        #endif // NAGLE
 
         tsock->ws.handshake(host, "/");
         tsock->ws.text(false);
