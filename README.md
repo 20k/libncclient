@@ -286,7 +286,7 @@ if(sd_has_front_read(shared))
 
 5. Guaranteed compatibility with the server and current protocol
 
-# Things this API does not provides
+# Things this API does not provide
 
 1. Parsing or tokenising of text to extract scriptnames for the purposes of requesting autocompletes
 
