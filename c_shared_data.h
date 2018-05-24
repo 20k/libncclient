@@ -24,32 +24,32 @@ extern "C"
         int num;
     };
 
-    c_shared_data sd_alloc();
-    void sd_destroy(c_shared_data data);
+    __declspec(dllexport) c_shared_data sd_alloc();
+    __declspec(dllexport) void sd_destroy(c_shared_data data);
 
-    void sd_set_auth(c_shared_data data, sized_view auth);
-    sized_string sd_get_auth(c_shared_data data);
+    __declspec(dllexport) void sd_set_auth(c_shared_data data, sized_view auth);
+    __declspec(dllexport) sized_string sd_get_auth(c_shared_data data);
 
-    int sd_has_front_read(c_shared_data data);
-    int sd_has_front_write(c_shared_data data);
+    __declspec(dllexport) int sd_has_front_read(c_shared_data data);
+    __declspec(dllexport) int sd_has_front_write(c_shared_data data);
 
-    sized_string sd_get_front_read(c_shared_data data);
-    sized_string sd_get_front_write(c_shared_data data);
+    __declspec(dllexport) sized_string sd_get_front_read(c_shared_data data);
+    __declspec(dllexport) sized_string sd_get_front_write(c_shared_data data);
 
-    void sd_add_back_write(c_shared_data data, sized_view write);
-    void sd_add_back_read(c_shared_data data, sized_view read);
+    __declspec(dllexport) void sd_add_back_write(c_shared_data data, sized_view write);
+    __declspec(dllexport) void sd_add_back_read(c_shared_data data, sized_view read);
 
-    void sd_set_user(c_shared_data data, sized_view user);
-    sized_string sd_get_user(c_shared_data data);
+    __declspec(dllexport) void sd_set_user(c_shared_data data, sized_view user);
+    __declspec(dllexport) sized_string sd_get_user(c_shared_data data);
 
-    void sd_set_termination(c_shared_data data);
-    int sd_should_terminate(c_shared_data data);
+    __declspec(dllexport) void sd_set_termination(c_shared_data data);
+    __declspec(dllexport) int sd_should_terminate(c_shared_data data);
 
-    void sd_increment_termination_count(c_shared_data data);
-    int sd_get_termination_count(c_shared_data data);
+    __declspec(dllexport) void sd_increment_termination_count(c_shared_data data);
+    __declspec(dllexport) int sd_get_termination_count(c_shared_data data);
 
-    void free_string(char*);
-    void free_sized_string(sized_string str);
+    __declspec(dllexport) void free_string(char*);
+    __declspec(dllexport) void free_sized_string(sized_string str);
 #ifdef __cplusplus
 }
 #endif

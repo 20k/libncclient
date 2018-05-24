@@ -16,7 +16,7 @@ extern "C"
 
     //void nc_start(c_net_client data);
 
-    void nc_start(c_shared_data data, const char* host_ip, const char* host_port);
+    __declspec(dllexport) void nc_start(c_shared_data data, const char* host_ip, const char* host_port);
 
 #ifdef __cplusplus
 }

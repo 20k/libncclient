@@ -59,6 +59,7 @@
 		</VirtualTargets>
 		<Compiler>
 			<Add option="-std=c++17" />
+			<Add option="-fvisibility=hidden" />
 		</Compiler>
 		<Linker>
 			<Add option="-lsfml-system" />
