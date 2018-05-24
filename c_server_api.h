@@ -30,6 +30,10 @@ extern "C"
                                          sized_view* on_pressed, int num_pressed,
                                          sized_view* on_released, int num_released);
 
+    void sa_do_update_mouse_to_script(c_shared_data data, int script_id,
+                                      float mousewheel_x, float mousewheel_y,
+                                      float mouse_x,      float mouse_y);
+
     void sa_do_send_script_info(c_shared_data data, int script_id,
                                 int width, int height);
 

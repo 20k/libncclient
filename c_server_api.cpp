@@ -209,6 +209,27 @@ void sa_do_send_keystrokes_to_script(c_shared_data data, int script_id,
     sd_add_back_write(data, make_view(full_command));
 }
 
+void sa_do_update_mouse_to_script(c_shared_data data, int script_id,
+                                  float mousewheel_x, float mousewheel_y,
+                                  float mouse_x,      float mouse_y)
+{
+    std::string command = "client_script_mouseinput ";
+
+    using nlohmann::json;
+
+    json j;
+
+    j["id"] = script_id;
+    j["mouse_x"] = mouse_x;
+    j["mouse_y"] = mouse_y;
+    j["mousewheel_x"] = mousewheel_x;
+    j["mousewheel_y"] = mousewheel_y;
+
+    std::string full_command = command + j.dump();
+
+    sd_add_back_write(data, make_view(full_command));
+}
+
 void sa_do_send_script_info(c_shared_data data, int script_id, int width, int height)
 {
     std::string command = "client_script_info ";
