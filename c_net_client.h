@@ -1,6 +1,7 @@
 #ifndef C_NET_CLIENT_H_INCLUDED
 #define C_NET_CLIENT_H_INCLUDED
 
+#include "c_config.h"
 #include "c_shared_data.h"
 
 #ifdef __cplusplus
@@ -16,7 +17,7 @@ extern "C"
 
     //void nc_start(c_net_client data);
 
-    DLL_EXPORT void nc_start(c_shared_data data, const char* host_ip, const char* host_port);
+    DLL_EXPORT void SHIM(nc_start, c_shared_data data, const char* host_ip, const char* host_port);
 
 #ifdef __cplusplus
 }

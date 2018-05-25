@@ -1,4 +1,6 @@
 #include "c_shared_data.h"
+
+#ifdef SOURCE_GENERATION
 #include "nc_util.hpp"
 #include "nc_string_interop.hpp"
 
@@ -208,3 +210,7 @@ void DLL_EXPORT  free_sized_string(sized_string str)
 
     delete [] str.str;
 }
+#else
+
+
+#endif

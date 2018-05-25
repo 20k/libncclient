@@ -18,6 +18,13 @@
 					<Add option="-Wall" />
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add option="-lsfml-system" />
+					<Add option="-lws2_32" />
+					<Add option="-lboost_system-mt" />
+					<Add option="-lmswsock" />
+					<Add option="-lboost_filesystem-mt" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/ncclient" prefix_auto="1" extension_auto="1" />
@@ -31,6 +38,13 @@
 					<Add option="-O2" />
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add option="-lsfml-system" />
+					<Add option="-lws2_32" />
+					<Add option="-lboost_system-mt" />
+					<Add option="-lmswsock" />
+					<Add option="-lboost_filesystem-mt" />
+				</Linker>
 				<ExtraCommands>
 					<Add after="Release.bat" />
 					<Mode after="always" />
@@ -48,8 +62,55 @@
 					<Add option="-O2" />
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add option="-lsfml-system" />
+					<Add option="-lws2_32" />
+					<Add option="-lboost_system-mt" />
+					<Add option="-lmswsock" />
+					<Add option="-lboost_filesystem-mt" />
+				</Linker>
 				<ExtraCommands>
 					<Add after="Release32bit.bat" />
+					<Mode after="always" />
+				</ExtraCommands>
+			</Target>
+			<Target title="StaticRelease">
+				<Option output="bin/Static/ncclient-s" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/Static/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add option="-lsfml-system" />
+					<Add option="-lws2_32" />
+					<Add option="-lboost_system-mt" />
+					<Add option="-lmswsock" />
+					<Add option="-lboost_filesystem-mt" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="Release.bat" />
+					<Mode after="always" />
+				</ExtraCommands>
+			</Target>
+			<Target title="LuaShim64">
+				<Option output="bin/LuaShim64/ncclient" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/LuaShim64" />
+				<Option object_output="obj/LuaShim64/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-g" />
+				</Compiler>
+				<ExtraCommands>
+					<Add after="Release.bat" />
 					<Mode after="always" />
 				</ExtraCommands>
 			</Target>
@@ -61,14 +122,8 @@
 			<Add option="-std=c++17" />
 			<Add option="-fvisibility=hidden" />
 		</Compiler>
-		<Linker>
-			<Add option="-lsfml-system" />
-			<Add option="-lws2_32" />
-			<Add option="-lboost_system-mt" />
-			<Add option="-lmswsock" />
-			<Add option="-lboost_filesystem-mt" />
-		</Linker>
 		<Unit filename="c_all.h" />
+		<Unit filename="c_config.h" />
 		<Unit filename="c_net_client.cpp" />
 		<Unit filename="c_net_client.h" />
 		<Unit filename="c_server_api.cpp" />

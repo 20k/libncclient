@@ -1,4 +1,5 @@
 #include "c_server_api.h"
+#include "c_config.h"
 
 #ifdef SOURCE_GENERATION
 #include "nc_util.hpp"
@@ -625,9 +626,93 @@ sized_string DLL_EXPORT sa_server_scriptargs_ratelimit_to_script_name(server_com
         return {};
     };
 }
-#endif // SOURCE_GENERATION
+#else
 
-/*void sleep_for_ms(int ms)
+#include <windows.h>
+
+HMODULE dll_handle = LoadLibrary("ncclient.dll");
+
+#undef C_SERVER_API_H_INCLUDED
+#undef SHIM
+#undef DLL_EXPORT
+
+template<typename T, typename... U>
+inline
+auto helper(T& t, U... u) -> decltype(T(u...))
+{
+    return t(u...);
+}
+
+#define SHIM(x, ...) inline (tl ## x)(T... args) {decltype(x)* myfunc = (decltype(x)*)GetProcAddress(dll_handle, #x); return myfunc(args...);} \
+                     decltype(x(__VA_ARGS__)) (*l ## x)(__VA_ARGS__) = 0;
+                     //declspec(__dllexport) extern "C" (*l ## x)(__VA_ARGS__) = &(tl ## x)<__VA_ARGS__>;
+
+#define DLL_EXPORT template<typename... T>
+
+#define NO_DS
+#define SKIP_LINKAGE
+#include "c_server_api.h"
+
+
+
+
+/*MAKE_SHIM(sized_string, sa_make_chat_command, sized_view, sized_view);
+MAKE_SHIM(sized_string, sa_make_generic_server_command, sized_view);
+MAKE_SHIM(sized_string, sa_make_autocomplete_request, sized_view);
+MAKE_SHIM(int, sa_is_local_command, sized_view);
+MAKE_SHIM(int, sa_is_local_command, sized_view);
+
+MAKE_SHIM(sized_string, sa_default_up_handling, sized_view, sized_view, sized_view);
+
+MAKE_SHIM(void, sa_do_poll_server, c_shared_data);
+MAKE_SHIM(void, sa_do_autocomplete_request,c_shared_data, sized_view);
+MAKE_SHIM(void, sa_do_terminate_all_scripts,c_shared_data);
+MAKE_SHIM(void, sa_do_terminate_script,c_shared_data, int);
+
+///deprecated, do not use!
+MAKE_SHIM(void, sa_do_send_keystrokes_to_script, c_shared_data, int,
+                                     sized_view*, int,
+                                     sized_view*, int,
+                                     sized_view*, int);
+
+MAKE_SHIM(void, sa_do_send_key_event_stream_to_script,c_shared_data, int,
+                                           key_state*, int);
+
+MAKE_SHIM(void, sa_do_update_mouse_to_script,c_shared_data, int,
+                                  float, float,
+                                  float, float);
+
+MAKE_SHIM(void, sa_do_send_script_info,c_shared_data, int,
+                            int, int);
+
+MAKE_SHIM(void, sa_destroy_server_command_info,server_command_info);
+MAKE_SHIM(void, sa_destroy_realtime_info,realtime_info);
+MAKE_SHIM(void, sa_destroy_chat_api_info,chat_api_info);
+MAKE_SHIM(void, sa_destroy_script_argument_list,script_argument_list);
+
+MAKE_SHIM(server_command_info sa_server_response_to_info,sized_view);
+
+///server_command_command
+MAKE_SHIM(sized_string sa_command_to_human_readable,server_command_info);
+
+MAKE_SHIM(realtime_info sa_command_realtime_to_info,server_command_info);
+
+///server_command_chat_api
+MAKE_SHIM(chat_api_info sa_chat_api_to_info,server_command_info);
+
+///server_command_server_scriptargs
+MAKE_SHIM(script_argument_list sa_server_scriptargs_to_list,server_command_info);
+
+///may return nullptr
+///server_command_server_scriptargs_invalid
+MAKE_SHIM(sized_string sa_server_scriptargs_invalid_to_script_name,server_command_info);
+
+///server_command_server_scriptargs_ratelimit
+MAKE_SHIM(sized_string sa_server_scriptargs_ratelimit_to_script_name,server_command_info);*/
+
+#endif
+
+/*void, sleep_for_ms(int ms)
 {
     Sleep(ms);
 }*/

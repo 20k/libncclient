@@ -1,4 +1,7 @@
 #include "c_net_client.h"
+
+#ifdef SOURCE_GENERATION
+
 #include "nc_util.hpp"
 #include "socket.hpp"
 #include "nc_string_interop.hpp"
@@ -250,3 +253,6 @@ void DLL_EXPORT nc_start(c_shared_data data, const char* host_ip, const char* ho
     std::thread(handle_async_write, data, std::ref(*ctx)).detach();
     std::thread(watchdog, data, std::ref(*ctx), hip, hpo).detach();
 }
+#else
+
+#endif
