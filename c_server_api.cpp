@@ -629,12 +629,16 @@ sized_string DLL_EXPORT sa_server_scriptargs_ratelimit_to_script_name(server_com
 #else
 
 #include <windows.h>
-
 HMODULE dll_handle = LoadLibrary("ncclient.dll");
+
+#if 0
+
 
 #undef C_SERVER_API_H_INCLUDED
 #undef SHIM
 #undef DLL_EXPORT
+
+#define SHIM(x, ...)(*l ## x)(__VA_ARGS__) = &x;
 
 template<typename T, typename... U>
 inline
@@ -643,17 +647,108 @@ auto helper(T& t, U... u) -> decltype(T(u...))
     return t(u...);
 }
 
-#define SHIM(x, ...) inline (tl ## x)(T... args) {decltype(x)* myfunc = (decltype(x)*)GetProcAddress(dll_handle, #x); return myfunc(args...);} \
-                     decltype(x(__VA_ARGS__)) (*l ## x)(__VA_ARGS__) = 0;
-                     //declspec(__dllexport) extern "C" (*l ## x)(__VA_ARGS__) = &(tl ## x)<__VA_ARGS__>;
-
-#define DLL_EXPORT template<typename... T>
+#define DLL_EXPORT __declspec(dllexport)
 
 #define NO_DS
 #define SKIP_LINKAGE
 #include "c_server_api.h"
+#endif // 0
+
+#if 1
+#include <type_traits>
+
+/*#define SHIM(x, ...) inline (tl ## x)(T... args) {decltype(x)* myfunc = (decltype(x)*)GetProcAddress(dll_handle, #x); return myfunc(args...);} \
+                     extern "C" __declspec(dllexport) sized_string (*l ## x)(__VA_ARGS__) = &(tl ## x);
+
+#define DLL_EXPORT template<typename... T>
+
+DLL_EXPORT sized_string SHIM(sa_make_chat_command, sized_view, sized_view);*/
+
+/*#define SHIM(rt, x, ...) template<typename... T> inline rt (tl ## x)(T... args) {decltype(x)* myfunc = (decltype(x)*)GetProcAddress(dll_handle, #x); return myfunc(args...);} \
+                         extern "C" __declspec(dllexport) rt (*l ## x)(__VA_ARGS__) = &tl ## x<__VA_ARGS__>;*/
+
+#define SHIM(x) template<typename... T> inline auto (tl ## x)(T... args) {decltype(x)* myfunc = (decltype(x)*)GetProcAddress(dll_handle, #x); return myfunc(args...);} \
+                extern "C" __declspec(dllexport) decltype(x) (*l ## x) = &tl ## x;
 
 
+SHIM(sa_make_chat_command);
+
+//template<typename... T> inline void test_1(T... args){}
+//extern "C" __declspec(dllexport) void (*test_2)(int, int) = &test_1<int, int>;
+
+
+//DLL_EXPORT sized_string SHIM(sa_make_chat_command, sized_view, sized_view);
+
+//extern "C" __declspec(dllexport) sized_string (*lsa_make_chat_command)(sized_view a, sized_view b) = &tlsa_make_chat_command;
+
+//extern "C" __declspec(dllexport) sized_string lsa_make_chat_command(sized_view a, sized_view b) {return tlsa_make_chat_command(a, b);};
+
+//std::invoke_result_t<sa_make_chat_command(sized_view, sized_view)>::type test;
+
+                     //declspec(__dllexport) extern "C" (*l ## x)(__VA_ARGS__) = &(tl ## x)<__VA_ARGS__>;
+
+//DLL_EXPORT sized_string SHIM(sa_make_chat_command, sized_view, sized_view);
+
+//DLL_EXPORT sized_string sa_make_chat_command(sized_view chat_channel, sized_view chat_msg);
+///does not handle #up
+DLL_EXPORT sized_string sa_make_generic_server_command(sized_view server_msg);
+
+DLL_EXPORT sized_string sa_make_autocomplete_request(sized_view scriptname);
+
+DLL_EXPORT int sa_is_local_command(sized_view server_msg);
+
+///handles everything for #up, #up_es6, and #dry
+///you should free server_msg and use the return value
+///converts #up scriptname -> #up scriptname script_data
+DLL_EXPORT sized_string sa_default_up_handling(sized_view for_user, sized_view server_msg, sized_view scripts_dir);
+
+DLL_EXPORT void sa_do_poll_server(c_shared_data data);
+DLL_EXPORT void sa_do_autocomplete_request(c_shared_data data, sized_view scriptname);
+DLL_EXPORT void sa_do_terminate_all_scripts(c_shared_data data);
+DLL_EXPORT void sa_do_terminate_script(c_shared_data data, int script_id);
+
+///deprecated, do not use!
+DLL_EXPORT void sa_do_send_keystrokes_to_script(c_shared_data data, int script_id,
+                                                 sized_view* keystrokes, int num_keystrokes,
+                                                 sized_view* on_pressed, int num_pressed,
+                                                 sized_view* on_released, int num_released);
+
+DLL_EXPORT void sa_do_send_key_event_stream_to_script(c_shared_data data, int script_id,
+                                           key_state* events, int num_events);
+
+DLL_EXPORT void sa_do_update_mouse_to_script(c_shared_data data, int script_id,
+                                              float mousewheel_x, float mousewheel_y,
+                                              float mouse_x,      float mouse_y);
+
+DLL_EXPORT void sa_do_send_script_info(c_shared_data data, int script_id,
+                            int width, int height);
+
+
+DLL_EXPORT void sa_destroy_server_command_info(server_command_info info);
+DLL_EXPORT void sa_destroy_realtime_info(realtime_info info);
+DLL_EXPORT void sa_destroy_chat_api_info(chat_api_info info);
+DLL_EXPORT void sa_destroy_script_argument_list(script_argument_list argl);
+
+DLL_EXPORT server_command_info sa_server_response_to_info(sized_view server_response);
+
+///server_command_command
+DLL_EXPORT sized_string sa_command_to_human_readable(server_command_info info);
+
+DLL_EXPORT realtime_info sa_command_realtime_to_info(server_command_info info);
+
+///server_command_chat_api
+DLL_EXPORT chat_api_info sa_chat_api_to_info(server_command_info info);
+
+///server_command_server_scriptargs
+DLL_EXPORT script_argument_list sa_server_scriptargs_to_list(server_command_info info);
+
+///may return nullptr
+///server_command_server_scriptargs_invalid
+DLL_EXPORT sized_string sa_server_scriptargs_invalid_to_script_name(server_command_info info);
+
+///server_command_server_scriptargs_ratelimit
+DLL_EXPORT sized_string sa_server_scriptargs_ratelimit_to_script_name(server_command_info info);
+#endif // 0
 
 
 /*MAKE_SHIM(sized_string, sa_make_chat_command, sized_view, sized_view);
