@@ -1,4 +1,6 @@
 #include "c_server_api.h"
+
+#ifdef SOURCE_GENERATION
 #include "nc_util.hpp"
 
 #include <iostream>
@@ -7,7 +9,7 @@
 #include "nc_string_interop.hpp"
 #include "deps/json/json.hpp"
 
-sized_string sa_make_chat_command(sized_view chat_channel, sized_view chat_msg)
+sized_string DLL_EXPORT sa_make_chat_command(sized_view chat_channel, sized_view chat_msg)
 {
     std::string s1 = c_str_sized_to_cpp(chat_channel);
     std::string s2 = c_str_sized_to_cpp(chat_msg);
@@ -17,7 +19,7 @@ sized_string sa_make_chat_command(sized_view chat_channel, sized_view chat_msg)
     return make_copy(full);
 }
 
-sized_string sa_make_generic_server_command(sized_view server_msg)
+sized_string DLL_EXPORT  sa_make_generic_server_command(sized_view server_msg)
 {
     std::string str = c_str_sized_to_cpp(server_msg);
 
@@ -26,7 +28,7 @@ sized_string sa_make_generic_server_command(sized_view server_msg)
     return make_copy(full_command);
 }
 
-sized_string sa_make_autocomplete_request(sized_view server_msg)
+sized_string DLL_EXPORT  sa_make_autocomplete_request(sized_view server_msg)
 {
     std::string str = c_str_sized_to_cpp(server_msg);
 
@@ -74,12 +76,12 @@ bool is_local_command(const std::string& command)
     return false;
 }
 
-int sa_is_local_command(sized_view server_msg)
+int DLL_EXPORT  sa_is_local_command(sized_view server_msg)
 {
     return is_local_command(c_str_sized_to_cpp(server_msg));
 }
 
-sized_string sa_default_up_handling(sized_view for_user, sized_view server_msg, sized_view scripts_dir)
+sized_string DLL_EXPORT  sa_default_up_handling(sized_view for_user, sized_view server_msg, sized_view scripts_dir)
 {
     if(for_user.str == nullptr || server_msg.str == nullptr || scripts_dir.str == nullptr)
     {
@@ -129,14 +131,14 @@ sized_string sa_default_up_handling(sized_view for_user, sized_view server_msg, 
     return make_copy(unknown_command);
 }
 
-void sa_do_poll_server(c_shared_data data)
+void DLL_EXPORT  sa_do_poll_server(c_shared_data data)
 {
     const char* str = "client_poll_json";
 
     sd_add_back_write(data, make_view_from_raw(str));
 }
 
-void sa_do_autocomplete_request(c_shared_data data, sized_view scriptname)
+void DLL_EXPORT  sa_do_autocomplete_request(c_shared_data data, sized_view scriptname)
 {
     sized_string req = sa_make_autocomplete_request(scriptname);
 
@@ -145,7 +147,7 @@ void sa_do_autocomplete_request(c_shared_data data, sized_view scriptname)
     free_sized_string(req);
 }
 
-void sa_do_terminate_all_scripts(c_shared_data data)
+void DLL_EXPORT  sa_do_terminate_all_scripts(c_shared_data data)
 {
     std::string command = "client_terminate_scripts";
 
@@ -157,7 +159,7 @@ void sa_do_terminate_all_scripts(c_shared_data data)
     sd_add_back_write(data, make_view(command + " " + j.dump()));
 }
 
-void sa_do_terminate_script(c_shared_data data, int script_id)
+void DLL_EXPORT  sa_do_terminate_script(c_shared_data data, int script_id)
 {
     std::string command = "client_terminate_scripts";
 
@@ -169,7 +171,7 @@ void sa_do_terminate_script(c_shared_data data, int script_id)
     sd_add_back_write(data, make_view(command + " " + j.dump()));
 }
 
-void sa_do_send_keystrokes_to_script(c_shared_data data, int script_id,
+void DLL_EXPORT  sa_do_send_keystrokes_to_script(c_shared_data data, int script_id,
                                      sized_view* keystrokes, int num_keystrokes,
                                      sized_view* on_pressed, int num_pressed,
                                      sized_view* on_released, int num_released)
@@ -209,7 +211,7 @@ void sa_do_send_keystrokes_to_script(c_shared_data data, int script_id,
     sd_add_back_write(data, make_view(full_command));
 }
 
-void sa_do_send_key_event_stream_to_script(c_shared_data data, int script_id, key_state* events, int num_events)
+void DLL_EXPORT  sa_do_send_key_event_stream_to_script(c_shared_data data, int script_id, key_state* events, int num_events)
 {
     std::string command = "client_script_keyevents ";
 
@@ -236,7 +238,7 @@ void sa_do_send_key_event_stream_to_script(c_shared_data data, int script_id, ke
     sd_add_back_write(data, make_view(full_command));
 }
 
-void sa_do_update_mouse_to_script(c_shared_data data, int script_id,
+void DLL_EXPORT  sa_do_update_mouse_to_script(c_shared_data data, int script_id,
                                   float mousewheel_x, float mousewheel_y,
                                   float mouse_x,      float mouse_y)
 {
@@ -257,7 +259,7 @@ void sa_do_update_mouse_to_script(c_shared_data data, int script_id,
     sd_add_back_write(data, make_view(full_command));
 }
 
-void sa_do_send_script_info(c_shared_data data, int script_id, int width, int height)
+void DLL_EXPORT  sa_do_send_script_info(c_shared_data data, int script_id, int width, int height)
 {
     std::string command = "client_script_info ";
 
@@ -274,7 +276,7 @@ void sa_do_send_script_info(c_shared_data data, int script_id, int width, int he
     sd_add_back_write(data, make_view(full_command));
 }
 
-void sa_destroy_server_command_info(server_command_info info)
+void DLL_EXPORT  sa_destroy_server_command_info(server_command_info info)
 {
     if(info.data.num == 0)
         return;
@@ -282,12 +284,12 @@ void sa_destroy_server_command_info(server_command_info info)
     free_sized_string(info.data);
 }
 
-void sa_destroy_realtime_info(realtime_info info)
+void DLL_EXPORT  sa_destroy_realtime_info(realtime_info info)
 {
     free_sized_string(info.msg);
 }
 
-server_command_info sa_server_response_to_info(sized_view server_response)
+server_command_info DLL_EXPORT  sa_server_response_to_info(sized_view server_response)
 {
     if(server_response.str == nullptr || server_response.num <= 0)
         return {error_invalid_response, {}};
@@ -325,7 +327,7 @@ server_command_info sa_server_response_to_info(sized_view server_response)
     return {error_invalid_response, {}};
 }
 
-sized_string sa_command_to_human_readable(server_command_info info)
+sized_string DLL_EXPORT  sa_command_to_human_readable(server_command_info info)
 {
     if(info.data.num == 0 || info.data.str == nullptr)
         return {};
@@ -335,7 +337,7 @@ sized_string sa_command_to_human_readable(server_command_info info)
     return make_copy(cp);
 }
 
-realtime_info sa_command_realtime_to_info(server_command_info info)
+realtime_info DLL_EXPORT sa_command_realtime_to_info(server_command_info info)
 {
     realtime_info ret;
 
@@ -396,7 +398,7 @@ realtime_info sa_command_realtime_to_info(server_command_info info)
     }
 }
 
-chat_api_info sa_chat_api_to_info(server_command_info info)
+chat_api_info DLL_EXPORT sa_chat_api_to_info(server_command_info info)
 {
     if(info.data.num == 0 || info.data.str == nullptr)
         return {};
@@ -482,7 +484,7 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
     }
 }
 
-void sa_destroy_chat_api_info(chat_api_info info)
+void DLL_EXPORT  sa_destroy_chat_api_info(chat_api_info info)
 {
     if(info.num_msgs > 0)
     {
@@ -517,7 +519,7 @@ void sa_destroy_chat_api_info(chat_api_info info)
     }
 }
 
-void sa_destroy_script_argument_list(script_argument_list argl)
+void DLL_EXPORT  sa_destroy_script_argument_list(script_argument_list argl)
 {
     for(int i=0; i < argl.num; i++)
     {
@@ -531,7 +533,7 @@ void sa_destroy_script_argument_list(script_argument_list argl)
         delete [] argl.args;
 }
 
-script_argument_list sa_server_scriptargs_to_list(server_command_info info)
+script_argument_list DLL_EXPORT  sa_server_scriptargs_to_list(server_command_info info)
 {
     if(info.data.num == 0 || info.data.str == nullptr)
         return {};
@@ -576,7 +578,7 @@ script_argument_list sa_server_scriptargs_to_list(server_command_info info)
     }
 }
 
-sized_string sa_server_scriptargs_invalid_to_script_name(server_command_info info)
+sized_string DLL_EXPORT sa_server_scriptargs_invalid_to_script_name(server_command_info info)
 {
     if(info.data.str == nullptr || info.data.num == 0)
         return {};
@@ -606,7 +608,7 @@ sized_string sa_server_scriptargs_invalid_to_script_name(server_command_info inf
     }
 }
 
-sized_string sa_server_scriptargs_ratelimit_to_script_name(server_command_info info)
+sized_string DLL_EXPORT sa_server_scriptargs_ratelimit_to_script_name(server_command_info info)
 {
     std::string str = c_str_sized_to_cpp(info.data);
 
@@ -623,3 +625,9 @@ sized_string sa_server_scriptargs_ratelimit_to_script_name(server_command_info i
         return {};
     };
 }
+#endif // SOURCE_GENERATION
+
+/*void sleep_for_ms(int ms)
+{
+    Sleep(ms);
+}*/

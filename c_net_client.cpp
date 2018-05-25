@@ -239,7 +239,7 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 }
 
 
-void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
+void DLL_EXPORT nc_start(c_shared_data data, const char* host_ip, const char* host_port)
 {
     shared_context* ctx = new shared_context();
 
