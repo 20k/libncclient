@@ -6,10 +6,13 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ssl/stream.hpp>
+#include <boost/beast/websocket/ssl.hpp>
 
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 namespace websocket = boost::beast::websocket;
+namespace ssl = boost::asio::ssl;               // from <boost/asio/ssl.hpp>
 
 // Report a failure
 inline
@@ -215,6 +218,86 @@ struct websock_socket : socket_interface
     virtual ~websock_socket(){}
 };
 
+struct websock_socket_ssl : socket_interface
+{
+    boost::beast::websocket::stream<ssl::stream<tcp::socket>> ws;
+    boost::beast::multi_buffer mbuffer;
+    boost::system::error_code lec;
+
+    websock_socket_ssl(tcp::socket&& sock, ssl::context& ctx) : ws{std::move(sock), ctx}
+    {
+        #ifdef NAGLE
+        boost::asio::ip::tcp::no_delay nagle(true);
+        ws.next_layer().next_layer().set_option(nagle);
+        #endif // NAGLE
+
+        boost::beast::websocket::permessage_deflate opt;
+        //opt.client_enable = true; // for clients
+
+        #ifdef WS_COMPRESSION
+        opt.server_enable = true; // for servers
+        ws.set_option(opt);
+        #endif // COMPRESSION
+
+        ws.next_layer().handshake(ssl::stream_base::server);
+
+        ws.accept();
+    }
+
+    websock_socket_ssl(boost::asio::io_context& ioc, ssl::context& ctx) : ws{ioc, ctx} {}
+
+    virtual bool read(boost::system::error_code& ec) override
+    {
+        mbuffer = decltype(mbuffer)();
+
+        ws.read(mbuffer, ec);
+        ws.text(ws.got_text());
+
+        if(ec)
+        {
+            fail(ec, "read");
+            return true;
+        }
+
+        return false;
+    }
+
+    std::string get_read() override
+    {
+        std::ostringstream os;
+        os << boost::beast::buffers(mbuffer.data());
+
+        return os.str();
+    }
+
+    virtual bool write(const std::string& msg) override
+    {
+        //ws.text(true);
+
+        ws.write(boost::asio::buffer(msg), lec);
+
+        if(lec)
+        {
+            fail(lec, "write");
+            return true;
+        }
+
+        return false;
+    }
+
+    virtual void shutdown() override
+    {
+        ws.close(boost::beast::websocket::close_code::normal, lec);
+    }
+
+    virtual bool is_open() override
+    {
+        return ws.is_open();
+    }
+
+    virtual ~websock_socket_ssl(){}
+};
+
 struct websock_socket_client : websock_socket
 {
     tcp::resolver resolver;
@@ -228,6 +311,24 @@ struct websock_socket_client : websock_socket
         //opt.server_enable = true; // for servers
         ws.set_option(opt);
         #endif // WS_COMPRESSION
+    }
+};
+
+struct websock_socket_client_ssl : websock_socket_ssl
+{
+    tcp::resolver resolver;
+
+    websock_socket_client_ssl(boost::asio::io_context& ioc, ssl::context& ctx) : websock_socket_ssl(ioc, ctx), resolver{ioc}
+    {
+        boost::beast::websocket::permessage_deflate opt;
+
+        #ifdef WS_COMPRESSION
+        opt.client_enable = true; // for clients
+        //opt.server_enable = true; // for servers
+        ws.set_option(opt);
+        #endif // WS_COMPRESSION
+
+
     }
 };
 

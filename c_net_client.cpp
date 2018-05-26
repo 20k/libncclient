@@ -36,9 +36,11 @@ struct shared_context
 
     websock_socket* sock = nullptr;
 
-    shared_context()
-    {
+    bool use_ssl = false;
 
+    shared_context(bool puse_ssl)
+    {
+        use_ssl = puse_ssl;
     }
 
     void connect(const std::string& host, const std::string& port)
@@ -46,7 +48,10 @@ struct shared_context
         if(sock)
             delete sock;
 
-        websock_socket_client* tsock = new websock_socket_client(ioc);
+        websock_socket_client* tsock = nullptr;
+
+        if(!use_ssl)
+            tsock = new websock_socket_client(ioc);
 
         auto const results = tsock->resolver.resolve(host, port);
 
@@ -241,7 +246,19 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 
 void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
 {
-    shared_context* ctx = new shared_context();
+    shared_context* ctx = new shared_context(false);
+
+    std::string hip(host_ip);
+    std::string hpo(host_port);
+
+    std::thread(handle_async_read, data, std::ref(*ctx)).detach();
+    std::thread(handle_async_write, data, std::ref(*ctx)).detach();
+    std::thread(watchdog, data, std::ref(*ctx), hip, hpo).detach();
+}
+
+void nc_start_ssl(c_shared_data data, const char* host_ip, const char* host_port)
+{
+    shared_context* ctx = new shared_context(true);
 
     std::string hip(host_ip);
     std::string hpo(host_port);
