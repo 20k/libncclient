@@ -11,6 +11,7 @@ extern "C"
     typedef shared_data* c_shared_data;
 
     ///owning
+    #pragma pack(1)
     struct sized_string
     {
         const char* str;
@@ -18,6 +19,7 @@ extern "C"
     };
 
     ///non owning
+    #pragma pack(1)
     struct sized_view
     {
         const char* str;
