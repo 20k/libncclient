@@ -8,7 +8,6 @@ extern "C"
 {
 #endif
 
-    #pragma pack(1)
     struct key_state
     {
         enum state
@@ -66,14 +65,12 @@ extern "C"
         error_invalid_response,
     };
 
-    #pragma pack(1)
     struct server_command_info
     {
         server_command_type type;
         sized_string data;
     };
 
-    #pragma pack(1)
     struct realtime_info
     {
         int id;
@@ -84,27 +81,23 @@ extern "C"
         int height;
     };
 
-    #pragma pack(1)
     struct chat_info
     {
         sized_string channel;
         sized_string msg;
     };
 
-    #pragma pack(1)
     struct chat_channel
     {
         sized_string channel;
     };
 
-    #pragma pack(1)
     struct tell_info
     {
         sized_string user;
         sized_string msg;
     };
 
-    #pragma pack(1)
     struct chat_api_info
     {
         chat_info* msgs;
@@ -117,14 +110,12 @@ extern "C"
         int num_tells;
     };
 
-    #pragma pack(1)
     struct script_argument
     {
         sized_string key;
         sized_string val;
     };
 
-    #pragma pack(1)
     struct script_argument_list
     {
         sized_string scriptname;
