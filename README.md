@@ -1,5 +1,7 @@
 This is the client lib for net_code, the official client uses everything here and so its guaranteed to work (as well as the official client does). You need to place all the dlls which are dependencies into the same directory as wherever ncclient.dll goes. The easiest way to get the 64bit dlls is from the game client, simply copy everything across, or use something like dependency walker to find them manually. If you try to FFI and get an error like "module not found", this is probably the issue
 
+The websocket TLS/SSL port is 6770, and the unencrypted port is 6760. IP is available on request
+
 # Concepts
 
 There are two kinds of strings. Owning and non owning - owning strings are a sized_string, and non owning strings are a sized_view. You are expected to manage the lifetime of a sized string by using free_sized_string on sized strings returned by the api
