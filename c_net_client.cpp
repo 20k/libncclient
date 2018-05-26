@@ -34,7 +34,9 @@ struct shared_context
     //tcp::resolver resolver;
     //tcp::socket socket;
 
-    websock_socket* sock = nullptr;
+    socket_interface* sock = nullptr;
+
+    ssl::context ctx{ssl::context::sslv23_client};
 
     bool use_ssl = false;
 
@@ -48,25 +50,48 @@ struct shared_context
         if(sock)
             delete sock;
 
-        websock_socket_client* tsock = nullptr;
-
         if(!use_ssl)
+        {
+            websock_socket_client* tsock = nullptr;
             tsock = new websock_socket_client(ioc);
 
-        auto const results = tsock->resolver.resolve(host, port);
+            auto const results = tsock->resolver.resolve(host, port);
 
-        boost::asio::connect(tsock->ws.next_layer(), results.begin(), results.end());
+            boost::asio::connect(tsock->ws.next_layer(), results.begin(), results.end());
 
-        #define NAGLE
-        #ifdef NAGLE
-        boost::asio::ip::tcp::no_delay nagle(true);
-        tsock->ws.next_layer().set_option(nagle);
-        #endif // NAGLE
+            #define NAGLE
+            #ifdef NAGLE
+            boost::asio::ip::tcp::no_delay nagle(true);
+            tsock->ws.next_layer().set_option(nagle);
+            #endif // NAGLE
 
-        tsock->ws.handshake(host, "/");
-        tsock->ws.text(false);
+            tsock->ws.handshake(host, "/");
+            tsock->ws.text(false);
 
-        sock = tsock;
+            sock = tsock;
+        }
+        else
+        {
+            websock_socket_client_ssl* tsock = nullptr;
+            tsock = new websock_socket_client_ssl(ioc, ctx);
+
+            auto const results = tsock->resolver.resolve(host, port);
+
+            boost::asio::connect(tsock->ws.next_layer().next_layer(), results.begin(), results.end());
+
+            #define NAGLE
+            #ifdef NAGLE
+            boost::asio::ip::tcp::no_delay nagle(true);
+            tsock->ws.next_layer().next_layer().set_option(nagle);
+            #endif // NAGLE
+
+            tsock->ws.next_layer().handshake(ssl::stream_base::client);
+
+            tsock->ws.handshake(host, "/");
+            tsock->ws.text(false);
+
+            sock = tsock;
+        }
     }
 };
 

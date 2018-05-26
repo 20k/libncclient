@@ -312,6 +312,8 @@ struct websock_socket_client : websock_socket
         ws.set_option(opt);
         #endif // WS_COMPRESSION
     }
+
+    virtual ~websock_socket_client(){}
 };
 
 struct websock_socket_client_ssl : websock_socket_ssl
@@ -330,6 +332,8 @@ struct websock_socket_client_ssl : websock_socket_ssl
 
 
     }
+
+    virtual ~websock_socket_client_ssl(){}
 };
 
 #endif // SOCKET_SHARED_HPP_INCLUDED
