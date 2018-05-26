@@ -34,11 +34,15 @@ struct shared_context
     //tcp::resolver resolver;
     //tcp::socket socket;
 
-    websock_socket* sock = nullptr;
+    socket_interface* sock = nullptr;
 
-    shared_context()
+    ssl::context ctx{ssl::context::sslv23_client};
+
+    bool use_ssl = false;
+
+    shared_context(bool puse_ssl)
     {
-
+        use_ssl = puse_ssl;
     }
 
     void connect(const std::string& host, const std::string& port)
@@ -46,22 +50,48 @@ struct shared_context
         if(sock)
             delete sock;
 
-        websock_socket_client* tsock = new websock_socket_client(ioc);
+        if(!use_ssl)
+        {
+            websock_socket_client* tsock = nullptr;
+            tsock = new websock_socket_client(ioc);
 
-        auto const results = tsock->resolver.resolve(host, port);
+            auto const results = tsock->resolver.resolve(host, port);
 
-        boost::asio::connect(tsock->ws.next_layer(), results.begin(), results.end());
+            boost::asio::connect(tsock->ws.next_layer(), results.begin(), results.end());
 
-        #define NAGLE
-        #ifdef NAGLE
-        boost::asio::ip::tcp::no_delay nagle(true);
-        tsock->ws.next_layer().set_option(nagle);
-        #endif // NAGLE
+            #define NAGLE
+            #ifdef NAGLE
+            boost::asio::ip::tcp::no_delay nagle(true);
+            tsock->ws.next_layer().set_option(nagle);
+            #endif // NAGLE
 
-        tsock->ws.handshake(host, "/");
-        tsock->ws.text(false);
+            tsock->ws.handshake(host, "/");
+            tsock->ws.text(false);
 
-        sock = tsock;
+            sock = tsock;
+        }
+        else
+        {
+            websock_socket_client_ssl* tsock = nullptr;
+            tsock = new websock_socket_client_ssl(ioc, ctx);
+
+            auto const results = tsock->resolver.resolve(host, port);
+
+            boost::asio::connect(tsock->ws.next_layer().next_layer(), results.begin(), results.end());
+
+            #define NAGLE
+            #ifdef NAGLE
+            boost::asio::ip::tcp::no_delay nagle(true);
+            tsock->ws.next_layer().next_layer().set_option(nagle);
+            #endif // NAGLE
+
+            tsock->ws.next_layer().handshake(ssl::stream_base::client);
+
+            tsock->ws.handshake(host, "/");
+            tsock->ws.text(false);
+
+            sock = tsock;
+        }
     }
 };
 
@@ -241,7 +271,19 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 
 void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
 {
-    shared_context* ctx = new shared_context();
+    shared_context* ctx = new shared_context(false);
+
+    std::string hip(host_ip);
+    std::string hpo(host_port);
+
+    std::thread(handle_async_read, data, std::ref(*ctx)).detach();
+    std::thread(handle_async_write, data, std::ref(*ctx)).detach();
+    std::thread(watchdog, data, std::ref(*ctx), hip, hpo).detach();
+}
+
+void nc_start_ssl(c_shared_data data, const char* host_ip, const char* host_port)
+{
+    shared_context* ctx = new shared_context(true);
 
     std::string hip(host_ip);
     std::string hpo(host_port);

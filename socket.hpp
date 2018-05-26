@@ -6,10 +6,14 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ssl/stream.hpp>
+#include <boost/beast/websocket/ssl.hpp>
+#include "nc_util.hpp"
 
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 namespace websocket = boost::beast::websocket;
+namespace ssl = boost::asio::ssl;               // from <boost/asio/ssl.hpp>
 
 // Report a failure
 inline
@@ -215,6 +219,117 @@ struct websock_socket : socket_interface
     virtual ~websock_socket(){}
 };
 
+struct ssl_ctx_wrap
+{
+    ssl::context ctx{ssl::context::sslv23};
+
+    ssl_ctx_wrap(bool init)
+    {
+        if(!init)
+            return;
+
+        ///remember to deploy these!
+        std::string cert = read_file_bin("./deps/secret/cert.pem");
+        std::string dh = read_file_bin("./deps/secret/dh.pem");
+        std::string key = read_file_bin("./deps/secret/key.pem");
+
+        ctx.set_options(boost::asio::ssl::context::default_workarounds |
+                        boost::asio::ssl::context::no_sslv2 |
+                        boost::asio::ssl::context::single_dh_use);
+
+        ctx.use_certificate_chain(
+            boost::asio::buffer(cert.data(), cert.size()));
+
+        ctx.use_private_key(
+            boost::asio::buffer(key.data(), key.size()),
+            boost::asio::ssl::context::file_format::pem);
+
+        ctx.use_tmp_dh(
+            boost::asio::buffer(dh.data(), dh.size()));
+    }
+};
+
+struct websock_socket_ssl : socket_interface
+{
+    ssl_ctx_wrap ctx;
+    boost::beast::websocket::stream<ssl::stream<tcp::socket>> ws;
+    boost::beast::multi_buffer mbuffer;
+    boost::system::error_code lec;
+
+    websock_socket_ssl(tcp::socket&& sock) : ctx(true), ws{std::move(sock), ctx.ctx}
+    {
+        #ifdef NAGLE
+        boost::asio::ip::tcp::no_delay nagle(true);
+        ws.next_layer().next_layer().set_option(nagle);
+        #endif // NAGLE
+
+        boost::beast::websocket::permessage_deflate opt;
+        //opt.client_enable = true; // for clients
+
+        #ifdef WS_COMPRESSION
+        opt.server_enable = true; // for servers
+        ws.set_option(opt);
+        #endif // COMPRESSION
+
+        ws.next_layer().handshake(ssl::stream_base::server);
+
+        ws.accept();
+    }
+
+    websock_socket_ssl(boost::asio::io_context& ioc, ssl::context& lctx) : ctx(false), ws{ioc, lctx} {}
+
+    virtual bool read(boost::system::error_code& ec) override
+    {
+        mbuffer = decltype(mbuffer)();
+
+        ws.read(mbuffer, ec);
+        ws.text(ws.got_text());
+
+        if(ec)
+        {
+            fail(ec, "read");
+            return true;
+        }
+
+        return false;
+    }
+
+    std::string get_read() override
+    {
+        std::ostringstream os;
+        os << boost::beast::buffers(mbuffer.data());
+
+        return os.str();
+    }
+
+    virtual bool write(const std::string& msg) override
+    {
+        //ws.text(true);
+
+        ws.write(boost::asio::buffer(msg), lec);
+
+        if(lec)
+        {
+            fail(lec, "write");
+            return true;
+        }
+
+        return false;
+    }
+
+    virtual void shutdown() override
+    {
+        ws.close(boost::beast::websocket::close_code::normal, lec);
+    }
+
+    virtual bool is_open() override
+    {
+        return ws.is_open();
+    }
+
+    virtual ~websock_socket_ssl(){}
+};
+
 struct websock_socket_client : websock_socket
 {
     tcp::resolver resolver;
@@ -229,6 +344,28 @@ struct websock_socket_client : websock_socket
         ws.set_option(opt);
         #endif // WS_COMPRESSION
     }
+
+    virtual ~websock_socket_client(){}
+};
+
+struct websock_socket_client_ssl : websock_socket_ssl
+{
+    tcp::resolver resolver;
+
+    websock_socket_client_ssl(boost::asio::io_context& ioc, ssl::context& ctx) : websock_socket_ssl(ioc, ctx), resolver{ioc}
+    {
+        boost::beast::websocket::permessage_deflate opt;
+
+        #ifdef WS_COMPRESSION
+        opt.client_enable = true; // for clients
+        //opt.server_enable = true; // for servers
+        ws.set_option(opt);
+        #endif // WS_COMPRESSION
+
+
+    }
+
+    virtual ~websock_socket_client_ssl(){}
 };
 
 #endif // SOCKET_SHARED_HPP_INCLUDED
