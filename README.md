@@ -1,4 +1,4 @@
-This is the client lib for net_code, the official client uses everything here and so its guaranteed to work (as well as the official client does)
+This is the client lib for net_code, the official client uses everything here and so its guaranteed to work (as well as the official client does). You need to place all the dlls which are dependencies into the same directory as wherever ncclient.dll goes. The easiest way to get the 64bit dlls is from the game client, simply copy everything across, or use something like dependency walker to find them manually. If you try to FFI and get an error like "module not found", this is probably the issue
 
 # Concepts
 
