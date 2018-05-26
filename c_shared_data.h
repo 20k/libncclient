@@ -11,18 +11,18 @@ extern "C"
     typedef shared_data* c_shared_data;
 
     ///owning
-    struct sized_string
+    typedef struct
     {
         const char* str;
         int num;
-    };
+    } sized_string;
 
     ///non owning
-    struct sized_view
+    typedef struct
     {
         const char* str;
         int num;
-    };
+    } sized_view;
 
     __declspec(dllexport) c_shared_data sd_alloc();
     __declspec(dllexport) void sd_destroy(c_shared_data data);

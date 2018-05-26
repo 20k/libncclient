@@ -8,17 +8,17 @@ extern "C"
 {
 #endif
 
-    struct key_state
+    typedef struct
     {
-        enum state
+        typedef enum
         {
             UP = 0,
             DOWN = 1,
-        };
+        } state;
 
         state st;
         sized_string key;
-    };
+    } key_state;
 
     __declspec(dllexport) sized_string sa_make_chat_command(sized_view chat_channel, sized_view chat_msg);
     ///does not handle #up
@@ -54,7 +54,7 @@ extern "C"
     __declspec(dllexport) void sa_do_send_script_info(c_shared_data data, int script_id,
                                 int width, int height);
 
-    enum server_command_type
+    typedef enum
     {
         server_command_command,
         server_command_chat_api,
@@ -63,15 +63,15 @@ extern "C"
         server_command_server_scriptargs_ratelimit,
         server_command_command_realtime,
         error_invalid_response,
-    };
+    } server_command_type;
 
-    struct server_command_info
+    typedef struct
     {
         server_command_type type;
         sized_string data;
-    };
+    } server_command_info;
 
-    struct realtime_info
+    typedef struct
     {
         int id;
         sized_string msg;
@@ -79,26 +79,26 @@ extern "C"
 
         int width;
         int height;
-    };
+    } realtime_info;
 
-    struct chat_info
+    typedef struct
     {
         sized_string channel;
         sized_string msg;
-    };
+    } chat_info;
 
-    struct chat_channel
+    typedef struct
     {
         sized_string channel;
-    };
+    } chat_channel;
 
-    struct tell_info
+    typedef struct
     {
         sized_string user;
         sized_string msg;
-    };
+    } tell_info;
 
-    struct chat_api_info
+    typedef struct
     {
         chat_info* msgs;
         int num_msgs;
@@ -108,20 +108,20 @@ extern "C"
 
         tell_info* tells;
         int num_tells;
-    };
+    } chat_api_info;
 
-    struct script_argument
+    typedef struct
     {
         sized_string key;
         sized_string val;
-    };
+    } script_argument;
 
-    struct script_argument_list
+    typedef struct
     {
         sized_string scriptname;
         script_argument* args;
         int num;
-    };
+    } script_argument_list;
 
     __declspec(dllexport) void sa_destroy_server_command_info(server_command_info info);
     __declspec(dllexport) void sa_destroy_realtime_info(realtime_info info);
