@@ -280,7 +280,7 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 }
 
 
-void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
+__declspec(dllexport) void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
 {
     shared_context* ctx = new shared_context(false);
 
@@ -292,7 +292,7 @@ void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
     std::thread(watchdog, data, std::ref(*ctx), hip, hpo).detach();
 }
 
-void nc_start_ssl(c_shared_data data, const char* host_ip, const char* host_port)
+__declspec(dllexport) void nc_start_ssl(c_shared_data data, const char* host_ip, const char* host_port)
 {
     shared_context* ctx = new shared_context(true);
 
