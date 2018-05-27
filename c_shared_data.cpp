@@ -50,6 +50,13 @@ struct shared_data
     {
         std::lock_guard<std::mutex> lk(ilock);
 
+        ///it might seem a little odd to produce an error string here
+        ///instead of doing something more sensible, but given that this function
+        ///will primarily display to the terminal, it will make it
+        ///extremely obvious if something has gone wrong
+        if(read_queue.size() == 0)
+            return "Catastrophic error in get_front_read(), queue is empty";
+
         std::string ret = read_queue.front();
 
         read_queue.pop_front();
@@ -60,6 +67,9 @@ struct shared_data
     std::string get_front_write()
     {
         std::lock_guard<std::mutex> lk(ilock);
+
+        if(write_queue.size() == 0)
+            return "Catstrophic error in get_front_write(), queue is empty";
 
         std::string ret = write_queue.front();
 
