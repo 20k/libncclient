@@ -210,6 +210,9 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 
         while(!socket_alive)
         {
+            if(sd_should_terminate(shared))
+                break;
+
             try
             {
                 std::string host = host_ip;
