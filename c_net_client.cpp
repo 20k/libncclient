@@ -104,11 +104,13 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
         //std::lock_guard<std::mutex> lk(local_mut);
         sf::sleep(sf::milliseconds(8));
 
+        if(sd_should_terminate(shared) && hacky_terminate)
+            break;
+
         if(sd_should_terminate(shared) && !hacky_terminate)
         {
             sd_add_back_write(shared, make_view("auth client"));
             hacky_terminate = true;
-            break;
         }
 
         try
