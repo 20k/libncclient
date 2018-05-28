@@ -104,6 +104,7 @@ sized_string sa_default_up_handling(sized_view for_user, sized_view server_msg, 
 
         std::string diskname = sdir + hardcoded_user + "." + name + ".es5.js";
         std::string diskname_es6 = sdir + hardcoded_user + "." + name + ".js";
+        std::string diskname_ts = sdir + hardcoded_user + "." + name + ".ts";
 
         std::string comm = up;
 
@@ -118,6 +119,12 @@ sized_string sa_default_up_handling(sized_view for_user, sized_view server_msg, 
         if(file_exists(diskname_es6))
         {
             data = read_file(diskname_es6);
+            comm = up_es6;
+        }
+
+        if(file_exists(diskname_ts))
+        {
+            data = read_file(diskname_ts);
             comm = up_es6;
         }
 
