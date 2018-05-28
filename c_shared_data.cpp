@@ -186,6 +186,8 @@ __declspec(dllexport) sized_string sd_get_user(c_shared_data data)
 __declspec(dllexport) void sd_set_termination(c_shared_data data)
 {
     data->should_terminate = true;
+
+    while(data->termination_count != 3){}
 }
 
 __declspec(dllexport) int sd_should_terminate(c_shared_data data)
