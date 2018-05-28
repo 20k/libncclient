@@ -50,6 +50,13 @@ struct shared_data
     {
         std::lock_guard<std::mutex> lk(ilock);
 
+        ///it might seem a little odd to produce an error string here
+        ///instead of doing something more sensible, but given that this function
+        ///will primarily display to the terminal, it will make it
+        ///extremely obvious if something has gone wrong
+        if(read_queue.size() == 0)
+            return "Catastrophic error in get_front_read(), queue is empty";
+
         std::string ret = read_queue.front();
 
         read_queue.pop_front();
@@ -60,6 +67,9 @@ struct shared_data
     std::string get_front_write()
     {
         std::lock_guard<std::mutex> lk(ilock);
+
+        if(write_queue.size() == 0)
+            return "Catstrophic error in get_front_write(), queue is empty";
 
         std::string ret = write_queue.front();
 
@@ -97,18 +107,18 @@ struct shared_data
     }
 };
 
-c_shared_data sd_alloc()
+__declspec(dllexport) c_shared_data sd_alloc()
 {
     return new shared_data;
 }
 
-void sd_destroy(c_shared_data data)
+__declspec(dllexport) void sd_destroy(c_shared_data data)
 {
     if(data != nullptr)
         delete data;
 }
 
-void sd_set_auth(c_shared_data data, sized_view auth)
+__declspec(dllexport) void sd_set_auth(c_shared_data data, sized_view auth)
 {
     if(auth.str == nullptr)
         return;
@@ -116,32 +126,32 @@ void sd_set_auth(c_shared_data data, sized_view auth)
     data->auth = c_str_sized_to_cpp(auth);
 }
 
-sized_string sd_get_auth(c_shared_data data)
+__declspec(dllexport) sized_string sd_get_auth(c_shared_data data)
 {
     return make_copy(data->auth);
 }
 
-int sd_has_front_read(c_shared_data data)
+__declspec(dllexport) int sd_has_front_read(c_shared_data data)
 {
     return data->has_front_read();
 }
 
-int sd_has_front_write(c_shared_data data)
+__declspec(dllexport) int sd_has_front_write(c_shared_data data)
 {
     return data->has_front_write();
 }
 
-sized_string sd_get_front_read(c_shared_data data)
+__declspec(dllexport) sized_string sd_get_front_read(c_shared_data data)
 {
     return make_copy(data->get_front_read());
 }
 
-sized_string sd_get_front_write(c_shared_data data)
+__declspec(dllexport) sized_string sd_get_front_write(c_shared_data data)
 {
     return make_copy(data->get_front_write());
 }
 
-void sd_add_back_write(c_shared_data data, sized_view write)
+__declspec(dllexport) void sd_add_back_write(c_shared_data data, sized_view write)
 {
     if(write.str == nullptr)
         return;
@@ -151,7 +161,7 @@ void sd_add_back_write(c_shared_data data, sized_view write)
     return data->add_back_write(str);
 }
 
-void sd_add_back_read(c_shared_data data, sized_view read)
+__declspec(dllexport) void sd_add_back_read(c_shared_data data, sized_view read)
 {
     if(read.str == nullptr)
         return;
@@ -161,39 +171,39 @@ void sd_add_back_read(c_shared_data data, sized_view read)
     return data->add_back_read(str);
 }
 
-void sd_set_user(c_shared_data data, sized_view user)
+__declspec(dllexport) void sd_set_user(c_shared_data data, sized_view user)
 {
     std::string str = c_str_sized_to_cpp(user);
 
     return data->set_user(str);
 }
 
-sized_string sd_get_user(c_shared_data data)
+__declspec(dllexport) sized_string sd_get_user(c_shared_data data)
 {
     return make_copy(data->get_user());
 }
 
-void sd_set_termination(c_shared_data data)
+__declspec(dllexport) void sd_set_termination(c_shared_data data)
 {
     data->should_terminate = true;
 }
 
-int sd_should_terminate(c_shared_data data)
+__declspec(dllexport) int sd_should_terminate(c_shared_data data)
 {
     return data->should_terminate;
 }
 
-void sd_increment_termination_count(c_shared_data data)
+__declspec(dllexport) void sd_increment_termination_count(c_shared_data data)
 {
     data->termination_count++;
 }
 
-int sd_get_termination_count(c_shared_data data)
+__declspec(dllexport) int sd_get_termination_count(c_shared_data data)
 {
     return data->termination_count;
 }
 
-void free_string(char* c)
+__declspec(dllexport) void free_string(char* c)
 {
     if(c == nullptr)
         return;
@@ -201,7 +211,7 @@ void free_string(char* c)
     delete [] c;
 }
 
-void free_sized_string(sized_string str)
+__declspec(dllexport) void free_sized_string(sized_string str)
 {
     if(str.str == nullptr)
         return;

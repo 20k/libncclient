@@ -18,6 +18,15 @@
 					<Add option="-Wall" />
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add option="-lboost_system-mgw73-mt-x64-1_67" />
+					<Add option="-lsfml-system" />
+					<Add option="-lws2_32" />
+					<Add option="-lmswsock" />
+					<Add option="-lboost_filesystem-mgw73-mt-x64-1_67" />
+					<Add option="-lcrypto" />
+					<Add option="-lssl" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/ncclient" prefix_auto="1" extension_auto="1" />
@@ -31,6 +40,15 @@
 					<Add option="-O2" />
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add option="-lboost_system-mgw73-mt-x64-1_67" />
+					<Add option="-lsfml-system" />
+					<Add option="-lws2_32" />
+					<Add option="-lmswsock" />
+					<Add option="-lboost_filesystem-mgw73-mt-x64-1_67" />
+					<Add option="-lcrypto" />
+					<Add option="-lssl" />
+				</Linker>
 				<ExtraCommands>
 					<Add after="Release.bat" />
 					<Mode after="always" />
@@ -48,6 +66,15 @@
 					<Add option="-O2" />
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add option="-lboost_system-mt" />
+					<Add option="-lsfml-system" />
+					<Add option="-lws2_32" />
+					<Add option="-lmswsock" />
+					<Add option="-lboost_filesystem-mt" />
+					<Add option="-lcrypto" />
+					<Add option="-lssl" />
+				</Linker>
 				<ExtraCommands>
 					<Add after="Release32bit.bat" />
 					<Mode after="always" />
@@ -61,13 +88,6 @@
 			<Add option="-std=c++17" />
 			<Add option="-fvisibility=hidden" />
 		</Compiler>
-		<Linker>
-			<Add option="-lsfml-system" />
-			<Add option="-lws2_32" />
-			<Add option="-lboost_system-mt" />
-			<Add option="-lmswsock" />
-			<Add option="-lboost_filesystem-mt" />
-		</Linker>
 		<Unit filename="c_all.h" />
 		<Unit filename="c_net_client.cpp" />
 		<Unit filename="c_net_client.h" />

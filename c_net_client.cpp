@@ -97,13 +97,21 @@ struct shared_context
 
 void handle_async_write(c_shared_data shared, shared_context& ctx)
 {
+    bool hacky_terminate = false;
+
     while(1)
     {
         //std::lock_guard<std::mutex> lk(local_mut);
         sf::sleep(sf::milliseconds(8));
 
-        if(sd_should_terminate(shared))
+        if(sd_should_terminate(shared) && hacky_terminate)
             break;
+
+        if(sd_should_terminate(shared) && !hacky_terminate)
+        {
+            sd_add_back_write(shared, make_view("auth client"));
+            hacky_terminate = true;
+        }
 
         try
         {
@@ -210,6 +218,9 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 
         while(!socket_alive)
         {
+            if(sd_should_terminate(shared))
+                break;
+
             try
             {
                 std::string host = host_ip;
@@ -269,7 +280,7 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 }
 
 
-void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
+__declspec(dllexport) void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
 {
     shared_context* ctx = new shared_context(false);
 
@@ -281,7 +292,7 @@ void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
     std::thread(watchdog, data, std::ref(*ctx), hip, hpo).detach();
 }
 
-void nc_start_ssl(c_shared_data data, const char* host_ip, const char* host_port)
+__declspec(dllexport) void nc_start_ssl(c_shared_data data, const char* host_ip, const char* host_port)
 {
     shared_context* ctx = new shared_context(true);
 
