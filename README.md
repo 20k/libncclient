@@ -105,7 +105,7 @@ const char* msg = "#scripts.core()";
 
 sized_string some_request = sa_make_generic_server_command({msg, strlen(msg)});
 
-sd_add_back_write(shared, some_request);
+sd_add_back_write(shared, {some_request.str, some_request.num});
 
 free_sized_string(some_request);
 ```
@@ -117,7 +117,7 @@ const char* scriptname = "scripts.core";
 
 sized_string some_request = sa_make_autocomplete_request({scriptname, strlen(scriptname)});
 
-sd_add_back_write(shared, some_request);
+sd_add_back_write(shared, {some_request.str, some_request.num});
 
 free_sized_string(some_request);
 ```
@@ -132,7 +132,7 @@ const char* chat_channel = "0000";
 
 sized_string some_request = sa_make_chat_command({chat_channel, strlen(chat_channel)}, {chat_message, strlen(chat_message)});
 
-sd_add_back_write(shared, some_request);
+sd_add_back_write(shared, {some_request.str, some_request.num});
 
 free_sized_string(some_request);
 ```
