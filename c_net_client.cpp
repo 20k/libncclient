@@ -182,6 +182,9 @@ void handle_async_read(c_shared_data shared, shared_context& ctx)
             if(!socket_alive)
                 continue;
 
+            if(ctx.sock->available() == 0)
+                continue;
+
             if(ctx.sock->read(ec))
             {
                 socket_alive = false;
