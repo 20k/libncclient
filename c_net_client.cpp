@@ -36,6 +36,8 @@ struct shared_context
 
     socket_interface* sock = nullptr;
 
+    c_shared_data data;
+
     ssl::context ctx{ssl::context::sslv23_client};
 
     bool use_ssl = false;
@@ -97,21 +99,13 @@ struct shared_context
 
 void handle_async_write(c_shared_data shared, shared_context& ctx)
 {
-    bool hacky_terminate = false;
-
     while(1)
     {
         //std::lock_guard<std::mutex> lk(local_mut);
         sf::sleep(sf::milliseconds(8));
 
-        if(sd_should_terminate(shared) && hacky_terminate)
+        if(sd_should_terminate(shared))
             break;
-
-        if(sd_should_terminate(shared) && !hacky_terminate)
-        {
-            sd_add_back_write(shared, make_view("auth client"));
-            hacky_terminate = true;
-        }
 
         try
         {
@@ -278,7 +272,9 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 
     printf("watchdog\n");
 
-    //ctx.sock->shutdown();
+    while(sd_get_termination_count(ctx.data) != 3){}
+
+    ctx.sock->shutdown();
 }
 }
 
@@ -286,6 +282,7 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 __declspec(dllexport) void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
 {
     shared_context* ctx = new shared_context(false);
+    ctx->data = data;
 
     std::string hip(host_ip);
     std::string hpo(host_port);
@@ -298,6 +295,7 @@ __declspec(dllexport) void nc_start(c_shared_data data, const char* host_ip, con
 __declspec(dllexport) void nc_start_ssl(c_shared_data data, const char* host_ip, const char* host_port)
 {
     shared_context* ctx = new shared_context(true);
+    ctx->data = data;
 
     std::string hip(host_ip);
     std::string hpo(host_port);
@@ -305,4 +303,11 @@ __declspec(dllexport) void nc_start_ssl(c_shared_data data, const char* host_ip,
     std::thread(handle_async_read, data, std::ref(*ctx)).detach();
     std::thread(handle_async_write, data, std::ref(*ctx)).detach();
     std::thread(watchdog, data, std::ref(*ctx), hip, hpo).detach();
+}
+
+__declspec(dllexport) void nc_shutdown(c_shared_data data)
+{
+    sd_set_termination(data);
+
+    while(sd_get_termination_count(data) != 3){}
 }

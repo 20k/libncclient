@@ -10,6 +10,7 @@
 #include <boost/beast/websocket/ssl.hpp>
 #include "nc_util.hpp"
 #include <mutex>
+#include <SFML/System.hpp>
 
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
@@ -61,7 +62,8 @@ struct send_lambda
 
 struct socket_interface
 {
-    std::mutex mut;
+    sf::Clock timeout_clock;
+    std::recursive_mutex mut;
 
     virtual bool write(const std::string& msg) {return false;};
     virtual bool read(boost::system::error_code& ec){return false;};
@@ -73,6 +75,20 @@ struct socket_interface
     virtual bool is_open(){return false;};
 
     virtual int available(){return 0;}
+
+    void restart_timeout()
+    {
+        std::lock_guard guard(mut);
+
+        timeout_clock.restart();
+    }
+
+    bool timed_out()
+    {
+        std::lock_guard guard(mut);
+
+        return timeout_clock.getElapsedTime().asSeconds() > 30;
+    }
 
     virtual ~socket_interface(){}
 };
@@ -107,6 +123,8 @@ struct http_socket : socket_interface
             fail(ec, "read");
             return true;
         }
+
+        restart_timeout();
 
         return false;
     }
@@ -197,6 +215,8 @@ struct websock_socket : socket_interface
             fail(ec, "read");
             return true;
         }
+
+        restart_timeout();
 
         return false;
     }
@@ -313,6 +333,8 @@ struct websock_socket_ssl : socket_interface
 
         ws.read(mbuffer, ec);
         ws.text(ws.got_text());
+
+        restart_timeout();
 
         if(ec)
         {

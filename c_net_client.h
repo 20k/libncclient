@@ -19,6 +19,8 @@ extern "C"
     __declspec(dllexport) void nc_start(c_shared_data data, const char* host_ip, const char* host_port);
     __declspec(dllexport) void nc_start_ssl(c_shared_data data, const char* host_ip, const char* host_port);
 
+    __declspec(dllexport) void nc_shutdown(c_shared_data data);
+
 #ifdef __cplusplus
 }
 #endif
