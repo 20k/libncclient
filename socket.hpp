@@ -343,6 +343,8 @@ struct websock_socket_client : websock_socket
         //opt.server_enable = true; // for servers
         ws.set_option(opt);
         #endif // WS_COMPRESSION
+
+        ws.text(false);
     }
 
     virtual ~websock_socket_client(){}
@@ -362,7 +364,7 @@ struct websock_socket_client_ssl : websock_socket_ssl
         ws.set_option(opt);
         #endif // WS_COMPRESSION
 
-
+        ws.text(false);
     }
 
     virtual ~websock_socket_client_ssl(){}
