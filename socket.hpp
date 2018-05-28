@@ -9,6 +9,7 @@
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/beast/websocket/ssl.hpp>
 #include "nc_util.hpp"
+#include <mutex>
 
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
@@ -60,6 +61,8 @@ struct send_lambda
 
 struct socket_interface
 {
+    std::mutex mut;
+
     virtual bool write(const std::string& msg) {return false;};
     virtual bool read(boost::system::error_code& ec){return false;};
 
@@ -68,6 +71,8 @@ struct socket_interface
     virtual void shutdown(){};
 
     virtual bool is_open(){return false;};
+
+    virtual int available(){return 0;}
 
     virtual ~socket_interface(){}
 };
@@ -88,6 +93,8 @@ struct http_socket : socket_interface
 
     virtual bool read(boost::system::error_code& ec) override
     {
+        std::lock_guard guard(mut);
+
         req = http::request<http::string_body>();
         buffer = boost::beast::flat_buffer();
 
@@ -106,11 +113,15 @@ struct http_socket : socket_interface
 
     virtual std::string get_read() override
     {
+        std::lock_guard guard(mut);
+
         return req.body();
     }
 
     virtual bool write(const std::string& msg) override
     {
+        std::lock_guard guard(mut);
+
         http::response<http::string_body> res{
                     std::piecewise_construct,
                     std::make_tuple(std::move(msg)),
@@ -135,6 +146,11 @@ struct http_socket : socket_interface
     virtual bool is_open() override
     {
         return socket.is_open();
+    }
+
+    virtual int available() override
+    {
+        return socket.available();
     }
 };
 
@@ -169,6 +185,8 @@ struct websock_socket : socket_interface
 
     virtual bool read(boost::system::error_code& ec) override
     {
+        std::lock_guard guard(mut);
+
         mbuffer = decltype(mbuffer)();
 
         ws.read(mbuffer, ec);
@@ -185,6 +203,8 @@ struct websock_socket : socket_interface
 
     std::string get_read() override
     {
+        std::lock_guard guard(mut);
+
         std::ostringstream os;
         os << boost::beast::buffers(mbuffer.data());
 
@@ -193,6 +213,8 @@ struct websock_socket : socket_interface
 
     virtual bool write(const std::string& msg) override
     {
+        std::lock_guard guard(mut);
+
         //ws.text(true);
 
         ws.write(boost::asio::buffer(msg), lec);
@@ -214,6 +236,11 @@ struct websock_socket : socket_interface
     virtual bool is_open() override
     {
         return ws.is_open();
+    }
+
+    virtual int available() override
+    {
+        return ws.next_layer().available();
     }
 
     virtual ~websock_socket(){}
@@ -280,6 +307,8 @@ struct websock_socket_ssl : socket_interface
 
     virtual bool read(boost::system::error_code& ec) override
     {
+        std::lock_guard guard(mut);
+
         mbuffer = decltype(mbuffer)();
 
         ws.read(mbuffer, ec);
@@ -296,6 +325,8 @@ struct websock_socket_ssl : socket_interface
 
     std::string get_read() override
     {
+        std::lock_guard guard(mut);
+
         std::ostringstream os;
         os << boost::beast::buffers(mbuffer.data());
 
@@ -304,6 +335,8 @@ struct websock_socket_ssl : socket_interface
 
     virtual bool write(const std::string& msg) override
     {
+        std::lock_guard guard(mut);
+
         //ws.text(true);
 
         ws.write(boost::asio::buffer(msg), lec);
@@ -325,6 +358,11 @@ struct websock_socket_ssl : socket_interface
     virtual bool is_open() override
     {
         return ws.is_open();
+    }
+
+    virtual int available() override
+    {
+        return ws.next_layer().next_layer().available();
     }
 
     virtual ~websock_socket_ssl(){}
