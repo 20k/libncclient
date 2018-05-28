@@ -140,7 +140,7 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
 
 void check_auth(c_shared_data shared, const std::string& str)
 {
-    std::string auth_str = "command ####registered secret ";
+    std::string auth_str = "command_auth secret ";
 
     if(str.substr(0, auth_str.length()) == auth_str)
     {
