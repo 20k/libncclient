@@ -100,6 +100,11 @@ extern "C"
 
     typedef struct
     {
+        sized_string msg;
+    } notif_info;
+
+    typedef struct
+    {
         chat_info* msgs;
         int num_msgs;
 
@@ -108,6 +113,9 @@ extern "C"
 
         tell_info* tells;
         int num_tells;
+
+        notif_info* notifs;
+        int num_notifs;
     } chat_api_info;
 
     typedef struct

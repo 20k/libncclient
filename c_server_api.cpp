@@ -418,6 +418,8 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
 
         std::vector<std::string> in_channels = full["channels"].get<std::vector<std::string>>();
 
+        std::vector<std::string> notif_msgs = full["notifs"];
+
         std::vector<std::string> chat_msgs;
         std::vector<std::string> chat_channels;
 
@@ -448,6 +450,7 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
         ret.num_msgs = chat_channels.size();
         ret.num_in_channels = in_channels.size();
         ret.num_tells = tell_users.size();
+        ret.num_notifs = notif_msgs.size();
 
         if(chat_channels.size() > 0)
         {
@@ -478,6 +481,16 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
             {
                 ret.tells[i].msg = make_copy(tell_msgs[i]);
                 ret.tells[i].user = make_copy(tell_users[i]);
+            }
+        }
+
+        if(notif_msgs.size() > 0)
+        {
+            ret.notifs = new notif_info[notif_msgs.size()];
+
+            for(int i=0; i < (int)notif_msgs.size(); i++)
+            {
+                ret.notifs[i].msg = make_copy(notif_msgs[i]);
             }
         }
 
@@ -521,6 +534,16 @@ void sa_destroy_chat_api_info(chat_api_info info)
         }
 
         delete [] info.tells;
+    }
+
+    if(info.num_notifs > 0)
+    {
+        for(int i=0; i < info.num_notifs; i++)
+        {
+            free_sized_string(info.notifs[i].msg);
+        }
+
+        delete [] info.notifs;
     }
 }
 
