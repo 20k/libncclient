@@ -86,12 +86,13 @@ One major feature of libncclient is the ability to hide the entire server api fr
 
 ### Creating Requests
 
-There are 4 kinds of server request:
+There are 5 kinds of server request:
 
 1. Poll
 2. Generic
 3. Autocomplete
 4. Chat api
+5. Realtime Script Updates
 
 ```js
 ```
@@ -137,6 +138,35 @@ sd_add_back_write(shared, {some_request.str, some_request.num});
 free_sized_string(some_request);
 ```
 
+5. There are 3 kinds of realtime script updates you can send. `sa_do_send_keystrokes_to_script`, `sa_do_update_mouse_to_script`, `sa_do_send_script_info`
+
+The mouse update is intentionally undocumented as the API is temporary and will change
+
+To send keystrokes to a script, the following example would work
+
+```
+const char* keys_input_1 = "up";
+const char* keys_input_2 = "space";
+const char* keys_pressed_1 = "up";
+const char* keys_released = "g";
+
+sized_string all_inputs[2] = {(sized_view){keys_input_1, strlen(keys_input_1}, (sized_view){keys_input_2, strlen(keys_input_2)}};
+sized_string all_pressed[] = {(sized_view){keys_pressed_1, strlen(keys_pressed_1)}}
+sized_string all_released[] = {(sized_view){keys_released, strlen(keys_released)}}
+
+sa_do_send_keystrokes_to_script(shared, script_id, all_inputs, 2, all_pressed, 1, all_released, 1);
+```
+
+To send script info updates, these can be done as follows
+
+
+```
+int current_width = 40; ///characters
+int current_height = 30;
+
+sa_do_send_script_info(shared, script_id, current_width, current_height);
+```
+
 #### Caveats
 
 When the user types a command, sa_is_local_command can be used to check if the official client would handle that command without sending anything to the server, eg the # command, or #edit. However the ability to execute these commands is currently not in the lib
@@ -163,7 +193,7 @@ free_sized_string(current_user);
 
 ### Parsing Responses
 
-There are 5 kinds of server response:
+There are 6 kinds of server response:
 
 1. server_command_command, -> response to a generic command
 
@@ -174,6 +204,8 @@ There are 5 kinds of server response:
 4. server_command_server_scriptargs_invalid, -> response to an invalid script argument request
 
 5. server_command_server_scriptargs_ratelimit, -> response if you are requesting too many script arguments per second
+
+6. server_command_command_realtime -> realtime script info
 
 To use the server response parsing abilities, this should work as follows:
 
@@ -269,6 +301,15 @@ if(sd_has_front_read(shared))
 		
 		free_sized_string(name);
 	}
+    
+    if(command.type == server_command_command_realtime)
+    {
+        realtime_info info = sa_command_realtime_to_info(command_info);
+    
+        ///do something with info
+    
+        sa_destroy_realtime_info(info);
+    }
 	
 	sa_destroy_server_command_info(command_info);
 	
