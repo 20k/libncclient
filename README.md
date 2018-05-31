@@ -208,7 +208,7 @@ There are 6 kinds of server response:
 
 5. server_command_server_scriptargs_ratelimit, -> response if you are requesting too many script arguments per second
 
-6. server_command_command_realtime -> realtime script info
+6. server_command_command_realtime -> This is a data packet for a realtime script and will be received continuously
 
 To use the server response parsing abilities, this should work as follows:
 
