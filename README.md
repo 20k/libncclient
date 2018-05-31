@@ -145,14 +145,17 @@ The mouse update is intentionally undocumented as the API is temporary and will 
 To send keystrokes to a script, the following example would work
 
 ```
-const char* keys_input_1 = "up";
-const char* keys_input_2 = "space";
-const char* keys_pressed_1 = "up";
-const char* keys_released_1 = "g";
+sized_view keys_input_1 = {"up", strlen(up)};
+sized_view keys_input_2 = {"space", strlen("space")};
+sized_view keys_pressed_1 = {"up", strlen("up")};
+sized_view keys_released_1 = {"g", strlen("g")};
 
-sized_string all_inputs[2] = {(sized_view){keys_input_1, strlen(keys_input_1}, (sized_view){keys_input_2, strlen(keys_input_2)}};
-sized_string all_pressed[] = {(sized_view){keys_pressed_1, strlen(keys_pressed_1)}}
-sized_string all_released[] = {(sized_view){keys_released_1, strlen(keys_released_1)}}
+///all keys that were input, like you'd expect from holding down a button in a chat box, or a general dialogue box
+sized_string all_inputs[2] = {keys_input_1, keys_input_2};
+///all keys that were pressed
+sized_string all_pressed[] = {keys_pressed_1}
+///all keys that were released
+sized_string all_released[] = {keys_released_1}
 
 sa_do_send_keystrokes_to_script(shared, script_id, all_inputs, 2, all_pressed, 1, all_released, 1);
 ```
