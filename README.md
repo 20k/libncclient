@@ -148,11 +148,11 @@ To send keystrokes to a script, the following example would work
 const char* keys_input_1 = "up";
 const char* keys_input_2 = "space";
 const char* keys_pressed_1 = "up";
-const char* keys_released = "g";
+const char* keys_released_1 = "g";
 
 sized_string all_inputs[2] = {(sized_view){keys_input_1, strlen(keys_input_1}, (sized_view){keys_input_2, strlen(keys_input_2)}};
 sized_string all_pressed[] = {(sized_view){keys_pressed_1, strlen(keys_pressed_1)}}
-sized_string all_released[] = {(sized_view){keys_released, strlen(keys_released)}}
+sized_string all_released[] = {(sized_view){keys_released_1, strlen(keys_released_1)}}
 
 sa_do_send_keystrokes_to_script(shared, script_id, all_inputs, 2, all_pressed, 1, all_released, 1);
 ```
