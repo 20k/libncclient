@@ -7,19 +7,6 @@
 extern "C"
 {
 #endif
-
-    typedef struct
-    {
-        typedef enum
-        {
-            UP = 0,
-            DOWN = 1,
-        } state;
-
-        state st;
-        sized_string key;
-    } key_state;
-
     __declspec(dllexport) sized_string sa_make_chat_command(sized_view chat_channel, sized_view chat_msg);
     ///does not handle #up
     __declspec(dllexport) sized_string sa_make_generic_server_command(sized_view server_msg);
@@ -43,9 +30,6 @@ extern "C"
                                          sized_view* keystrokes, int num_keystrokes,
                                          sized_view* on_pressed, int num_pressed,
                                          sized_view* on_released, int num_released);
-
-    __declspec(dllexport) void sa_do_send_key_event_stream_to_script(c_shared_data data, int script_id,
-                                               key_state* events, int num_events);
 
     __declspec(dllexport) void sa_do_update_mouse_to_script(c_shared_data data, int script_id,
                                       float mousewheel_x, float mousewheel_y,
@@ -100,6 +84,11 @@ extern "C"
 
     typedef struct
     {
+        sized_string msg;
+    } notif_info;
+
+    typedef struct
+    {
         chat_info* msgs;
         int num_msgs;
 
@@ -108,6 +97,9 @@ extern "C"
 
         tell_info* tells;
         int num_tells;
+
+        notif_info* notifs;
+        int num_notifs;
     } chat_api_info;
 
     typedef struct

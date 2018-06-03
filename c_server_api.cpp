@@ -104,6 +104,7 @@ sized_string sa_default_up_handling(sized_view for_user, sized_view server_msg, 
 
         std::string diskname = sdir + hardcoded_user + "." + name + ".es5.js";
         std::string diskname_es6 = sdir + hardcoded_user + "." + name + ".js";
+        std::string diskname_ts = sdir + hardcoded_user + "." + name + ".ts";
 
         std::string comm = up;
 
@@ -118,6 +119,12 @@ sized_string sa_default_up_handling(sized_view for_user, sized_view server_msg, 
         if(file_exists(diskname_es6))
         {
             data = read_file(diskname_es6);
+            comm = up_es6;
+        }
+
+        if(file_exists(diskname_ts))
+        {
+            data = read_file(diskname_ts);
             comm = up_es6;
         }
 
@@ -205,33 +212,6 @@ void sa_do_send_keystrokes_to_script(c_shared_data data, int script_id,
     j["pressed_keys"] = pressed;
 
     std::string full_command = command + j.dump();
-
-    sd_add_back_write(data, make_view(full_command));
-}
-
-void sa_do_send_key_event_stream_to_script(c_shared_data data, int script_id, key_state* events, int num_events)
-{
-    std::string command = "client_script_keyevents ";
-
-    using nlohmann::json;
-
-    std::vector<json> key_states;
-
-    for(int i=0; i < num_events; i++)
-    {
-        json j;
-        j["k"] = c_str_sized_to_cpp(events[i].key);
-        j["s"] = events[i].st;
-
-        key_states.push_back(j);
-    }
-
-    json main;
-
-    main["id"] = script_id;
-    main["events"] = key_states;
-
-    std::string full_command = command + main.dump();
 
     sd_add_back_write(data, make_view(full_command));
 }
@@ -411,6 +391,8 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
 
         std::vector<std::string> in_channels = full["channels"].get<std::vector<std::string>>();
 
+        std::vector<std::string> notif_msgs = full["notifs"];
+
         std::vector<std::string> chat_msgs;
         std::vector<std::string> chat_channels;
 
@@ -441,6 +423,7 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
         ret.num_msgs = chat_channels.size();
         ret.num_in_channels = in_channels.size();
         ret.num_tells = tell_users.size();
+        ret.num_notifs = notif_msgs.size();
 
         if(chat_channels.size() > 0)
         {
@@ -471,6 +454,16 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
             {
                 ret.tells[i].msg = make_copy(tell_msgs[i]);
                 ret.tells[i].user = make_copy(tell_users[i]);
+            }
+        }
+
+        if(notif_msgs.size() > 0)
+        {
+            ret.notifs = new notif_info[notif_msgs.size()];
+
+            for(int i=0; i < (int)notif_msgs.size(); i++)
+            {
+                ret.notifs[i].msg = make_copy(notif_msgs[i]);
             }
         }
 
@@ -514,6 +507,16 @@ void sa_destroy_chat_api_info(chat_api_info info)
         }
 
         delete [] info.tells;
+    }
+
+    if(info.num_notifs > 0)
+    {
+        for(int i=0; i < info.num_notifs; i++)
+        {
+            free_sized_string(info.notifs[i].msg);
+        }
+
+        delete [] info.notifs;
     }
 }
 
