@@ -473,6 +473,10 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
 
             ret.current_user = make_copy(cpp_user);
         }
+        else
+        {
+            ret.current_user = make_copy("");
+        }
 
         return ret;
     }
@@ -525,6 +529,8 @@ void sa_destroy_chat_api_info(chat_api_info info)
 
         delete [] info.notifs;
     }
+
+    free_sized_string(info.current_user);
 }
 
 void sa_destroy_script_argument_list(script_argument_list argl)
