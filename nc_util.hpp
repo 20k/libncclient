@@ -68,6 +68,25 @@ std::vector<std::string> split(const std::string &s, char delim)
 }
 
 inline
+std::string format_by_vector(std::string to_format, const std::vector<std::string>& all_strings)
+{
+    int len = 0;
+
+    for(auto& i : all_strings)
+    {
+        if((int)i.length() > len)
+            len = i.length();
+    }
+
+    for(int i=(int)to_format.length(); i<len; i++)
+    {
+        to_format = to_format + " ";
+    }
+
+    return to_format;
+}
+
+inline
 std::string strip_whitespace(std::string in)
 {
     if(in.size() == 0)
