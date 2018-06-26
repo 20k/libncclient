@@ -282,6 +282,13 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 
 __declspec(dllexport) void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
 {
+    std::string key_file = c_str_consume(sd_get_key_file_name(data));
+
+    if(file_exists(key_file))
+    {
+        sd_set_auth(data, make_view(read_file_bin(key_file)));
+    }
+
     shared_context* ctx = new shared_context(false);
     ctx->data = data;
 
@@ -295,6 +302,13 @@ __declspec(dllexport) void nc_start(c_shared_data data, const char* host_ip, con
 
 __declspec(dllexport) void nc_start_ssl(c_shared_data data, const char* host_ip, const char* host_port)
 {
+    std::string key_file = c_str_consume(sd_get_key_file_name(data));
+
+    if(file_exists(key_file))
+    {
+        sd_set_auth(data, make_view(read_file_bin(key_file)));
+    }
+
     shared_context* ctx = new shared_context(true);
     ctx->data = data;
 
