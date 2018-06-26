@@ -467,6 +467,13 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
             }
         }
 
+        if(full.count("user") > 0)
+        {
+            std::string cpp_user = full["user"];
+
+            ret.current_user = make_copy(cpp_user);
+        }
+
         return ret;
     }
     catch(...)

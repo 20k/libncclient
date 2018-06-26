@@ -100,6 +100,8 @@ extern "C"
 
         notif_info* notifs;
         int num_notifs;
+
+        sized_string current_user;
     } chat_api_info;
 
     typedef struct
