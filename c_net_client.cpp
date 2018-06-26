@@ -147,9 +147,11 @@ void check_auth(c_shared_data shared, const std::string& str)
         auto start = str.begin() + auth_str.length();
         std::string key(start, str.end());
 
-        if(!file_exists("key.key"))
+        std::string key_file = c_str_consume(sd_get_key_file_name(shared));
+
+        if(!file_exists(key_file))
         {
-            write_all_bin("key.key", key);
+            write_all_bin(key_file, key);
 
             sd_set_auth(shared, make_view(key));
         }
@@ -277,7 +279,6 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
     ctx.sock->shutdown();
 }
 }
-
 
 __declspec(dllexport) void nc_start(c_shared_data data, const char* host_ip, const char* host_port)
 {
