@@ -267,6 +267,12 @@ void sa_destroy_realtime_info(realtime_info info)
     free_sized_string(info.msg);
 }
 
+void sa_destroy_command_tagged_info(command_tagged_info info)
+{
+    free_sized_string(info.tag);
+    free_sized_string(info.val);
+}
+
 server_command_info sa_server_response_to_info(sized_view server_response)
 {
     if(server_response.str == nullptr || server_response.num <= 0)
@@ -278,6 +284,7 @@ server_command_info sa_server_response_to_info(sized_view server_response)
     std::string scriptargs = "server_scriptargs_json ";
     std::string invalid_str = "server_scriptargs_invalid_json";
     std::string ratelimit_str = "server_scriptargs_ratelimit_json ";
+    std::string command_tagged_str = "command_tagged ";
 
     std::vector<std::pair<server_command_type, std::string>> dat;
 
@@ -287,6 +294,7 @@ server_command_info sa_server_response_to_info(sized_view server_response)
     dat.push_back({server_command_server_scriptargs, scriptargs});
     dat.push_back({server_command_server_scriptargs_invalid, invalid_str});
     dat.push_back({server_command_server_scriptargs_ratelimit, ratelimit_str});
+    dat.push_back({server_command_command_tagged, command_tagged_str});
 
     std::string str = c_str_sized_to_cpp(server_response);
 
@@ -467,6 +475,17 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
             }
         }
 
+        if(full.count("user") > 0)
+        {
+            std::string cpp_user = full["user"];
+
+            ret.current_user = make_copy(cpp_user);
+        }
+        else
+        {
+            ret.current_user = make_copy("");
+        }
+
         return ret;
     }
     catch(...)
@@ -518,6 +537,8 @@ void sa_destroy_chat_api_info(chat_api_info info)
 
         delete [] info.notifs;
     }
+
+    free_sized_string(info.current_user);
 }
 
 void sa_destroy_script_argument_list(script_argument_list argl)
@@ -625,4 +646,34 @@ sized_string sa_server_scriptargs_ratelimit_to_script_name(server_command_info i
     {
         return {};
     };
+}
+
+command_tagged_info sa_command_tagged_to_info(server_command_info info)
+{
+    if(info.data.str == nullptr || info.data.num == 0)
+        return {};
+
+    std::string str = c_str_sized_to_cpp(info.data);
+
+    std::string tag;
+
+    for(int i=0; i < str.size() && str[i] != ' '; i++)
+    {
+        tag += str[i];
+    }
+
+    int idx = tag.size() + 1;
+
+    std::string val;
+
+    for(int i=idx; i < str.size(); i++)
+    {
+        val += str[i];
+    }
+
+    command_tagged_info ret;
+    ret.tag = make_copy(tag);
+    ret.val = make_copy(val);
+
+    return ret;
 }
