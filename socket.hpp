@@ -12,6 +12,10 @@
 #include <mutex>
 #include <SFML/System.hpp>
 
+#ifdef SERVER
+#include "../../logging.hpp"
+#endif // SERVER
+
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 namespace websocket = boost::beast::websocket;
@@ -275,14 +279,20 @@ struct ssl_ctx_wrap
         if(!init)
             return;
 
+        #ifdef SERVER
+        lg::log("Pre ssl ctx wrap");
+        #endif // SERVER
+
         ///remember to deploy these!
-        std::string cert = read_file_bin("./deps/secret/cert/cert.pem");
+        ///certpw1234
+        std::string cert = read_file_bin("./deps/secret/cert/cert.crt");
         std::string dh = read_file_bin("./deps/secret/cert/dh.pem");
         std::string key = read_file_bin("./deps/secret/cert/key.pem");
 
         ctx.set_options(boost::asio::ssl::context::default_workarounds |
                         boost::asio::ssl::context::no_sslv2 |
-                        boost::asio::ssl::context::single_dh_use);
+                        boost::asio::ssl::context::single_dh_use |
+                        boost::asio::ssl::context::no_sslv3);
 
         ctx.use_certificate_chain(
             boost::asio::buffer(cert.data(), cert.size()));
@@ -293,6 +303,10 @@ struct ssl_ctx_wrap
 
         ctx.use_tmp_dh(
             boost::asio::buffer(dh.data(), dh.size()));
+
+        #ifdef SERVER
+        lg::log("Post ssl ctx wrap");
+        #endif // SERVER
     }
 };
 
@@ -305,6 +319,10 @@ struct websock_socket_ssl : socket_interface
 
     websock_socket_ssl(tcp::socket&& sock) : ctx(true), ws{std::move(sock), ctx.ctx}
     {
+        #ifdef SERVER
+        lg::log("start ssl constructor websock");
+        #endif // SERVER
+
         #ifdef NAGLE
         boost::asio::ip::tcp::no_delay nagle(true);
         ws.next_layer().next_layer().set_option(nagle);
@@ -321,6 +339,10 @@ struct websock_socket_ssl : socket_interface
         ws.next_layer().handshake(ssl::stream_base::server);
 
         ws.accept();
+
+        #ifdef SERVER
+        lg::log("fin ssl constructor websock");
+        #endif // SERVER
     }
 
     websock_socket_ssl(boost::asio::io_context& ioc, ssl::context& lctx) : ctx(false), ws{ioc, lctx} {}
@@ -374,16 +396,22 @@ struct websock_socket_ssl : socket_interface
 
     virtual void shutdown() override
     {
+        std::lock_guard guard(mut);
+
         ws.close(boost::beast::websocket::close_code::normal, lec);
     }
 
     virtual bool is_open() override
     {
+        std::lock_guard guard(mut);
+
         return ws.is_open();
     }
 
     virtual int available() override
     {
+        std::lock_guard guard(mut);
+
         return ws.next_layer().next_layer().available();
     }
 

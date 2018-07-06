@@ -254,6 +254,12 @@ std::string make_val_col(const std::string& in)
 }
 
 inline
+std::string make_key_val(const std::string& key, const std::string& val)
+{
+    return make_key_col(key) + ":" + make_val_col(val);
+}
+
+inline
 std::string string_to_colour(const std::string& in)
 {
     if(in == "core")
