@@ -161,7 +161,7 @@ void check_auth(c_shared_data shared, const std::string& str)
         {
             printf("Key file already exists");
 
-            sd_add_back_read(shared, make_view(make_error_col("Did not overwrite existing key file")));
+            sd_add_back_read(shared, make_view(make_error_col("Did not overwrite existing key file, you are already registered")));
         }
     }
 }
