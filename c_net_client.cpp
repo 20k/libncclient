@@ -154,10 +154,14 @@ void check_auth(c_shared_data shared, const std::string& str)
             write_all_bin(key_file, key);
 
             sd_set_auth(shared, make_view(key));
+
+            sd_add_back_read(shared, make_view(make_success_col("Success!")));
         }
         else
         {
             printf("Key file already exists");
+
+            sd_add_back_read(shared, make_view(make_error_col("Did not overwrite existing key file")));
         }
     }
 }
