@@ -64,6 +64,7 @@ extern "C"
 
         int width;
         int height;
+        sized_string name;
     } realtime_info;
 
     typedef struct

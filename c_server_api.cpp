@@ -265,6 +265,7 @@ void sa_destroy_server_command_info(server_command_info info)
 void sa_destroy_realtime_info(realtime_info info)
 {
     free_sized_string(info.msg);
+    free_sized_string(info.name);
 }
 
 void sa_destroy_command_tagged_info(command_tagged_info info)
@@ -374,6 +375,17 @@ realtime_info sa_command_realtime_to_info(server_command_info info)
         else
         {
             ret.height = 0;
+        }
+
+        if(j.find("script_name") != j.end())
+        {
+            std::string name = j["script_name"];
+
+            ret.name = make_copy(name);
+        }
+        else
+        {
+            ret.name = make_copy("");
         }
 
         return ret;
