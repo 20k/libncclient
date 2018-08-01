@@ -155,13 +155,13 @@ void check_auth(c_shared_data shared, const std::string& str)
 
             sd_set_auth(shared, make_view(key));
 
-            sd_add_back_read(shared, make_view(make_success_col("Success!")));
+            sd_add_back_read(shared, make_view("command " + make_success_col("Success! Try user lowercase_name to get started, and then #scripts.core()")));
         }
         else
         {
             printf("Key file already exists");
 
-            sd_add_back_read(shared, make_view(make_error_col("Did not overwrite existing key file, you are already registered")));
+            sd_add_back_read(shared, make_view("command " + make_error_col("Did not overwrite existing key file, you are already registered")));
         }
     }
 }
