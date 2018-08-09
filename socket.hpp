@@ -256,21 +256,29 @@ struct websock_socket : socket_interface
 
     virtual void shutdown() override
     {
+        std::lock_guard guard(mut);
+
         ws.close(boost::beast::websocket::close_code::normal, lec);
     }
 
     virtual bool is_open() override
     {
+        std::lock_guard guard(mut);
+
         return ws.is_open();
     }
 
     virtual int available() override
     {
+        std::lock_guard guard(mut);
+
         return ws.next_layer().available();
     }
 
     virtual void ping(const std::string& payload) override
     {
+        std::lock_guard guard(mut);
+
         ws.ping(payload.c_str());
     }
 
@@ -424,6 +432,8 @@ struct websock_socket_ssl : socket_interface
 
     virtual void ping(const std::string& payload) override
     {
+        std::lock_guard guard(mut);
+
         ws.ping(payload.c_str());
     }
 
