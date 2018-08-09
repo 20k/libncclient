@@ -80,6 +80,8 @@ struct socket_interface
 
     virtual int available(){return 0;}
 
+    virtual void ping(const std::string& payload){}
+
     void restart_timeout()
     {
         std::lock_guard guard(mut);
@@ -267,6 +269,11 @@ struct websock_socket : socket_interface
         return ws.next_layer().available();
     }
 
+    virtual void ping(const std::string& payload) override
+    {
+        ws.ping(payload.c_str());
+    }
+
     virtual ~websock_socket(){}
 };
 
@@ -413,6 +420,11 @@ struct websock_socket_ssl : socket_interface
         std::lock_guard guard(mut);
 
         return ws.next_layer().next_layer().available();
+    }
+
+    virtual void ping(const std::string& payload) override
+    {
+        ws.ping(payload.c_str());
     }
 
     virtual ~websock_socket_ssl(){}
