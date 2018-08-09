@@ -47,6 +47,7 @@ extern "C"
         server_command_server_scriptargs_ratelimit,
         server_command_command_realtime,
         server_command_command_tagged,
+        server_command_command_ping,
         error_invalid_response,
     } server_command_type;
 
