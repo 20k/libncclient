@@ -300,9 +300,9 @@ struct ssl_ctx_wrap
 
         ///remember to deploy these!
         ///certpw1234
-        std::string cert = read_file_bin("./deps/secret/cert/cert.crt");
-        std::string dh = read_file_bin("./deps/secret/cert/dh.pem");
-        std::string key = read_file_bin("./deps/secret/cert/key.pem");
+        static std::string cert = read_file_bin("./deps/secret/cert/cert.crt");
+        static std::string dh = read_file_bin("./deps/secret/cert/dh.pem");
+        static std::string key = read_file_bin("./deps/secret/cert/key.pem");
 
         ctx.set_options(boost::asio::ssl::context::default_workarounds |
                         boost::asio::ssl::context::no_sslv2 |
