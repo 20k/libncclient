@@ -286,6 +286,7 @@ server_command_info sa_server_response_to_info(sized_view server_response)
     std::string invalid_str = "server_scriptargs_invalid_json";
     std::string ratelimit_str = "server_scriptargs_ratelimit_json ";
     std::string command_tagged_str = "command_tagged ";
+    std::string command_ping_str = "command_ping";
 
     std::vector<std::pair<server_command_type, std::string>> dat;
 
@@ -296,6 +297,7 @@ server_command_info sa_server_response_to_info(sized_view server_response)
     dat.push_back({server_command_server_scriptargs_invalid, invalid_str});
     dat.push_back({server_command_server_scriptargs_ratelimit, ratelimit_str});
     dat.push_back({server_command_command_tagged, command_tagged_str});
+    dat.push_back({server_command_command_ping, command_ping_str});
 
     std::string str = c_str_sized_to_cpp(server_response);
 
