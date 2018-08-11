@@ -256,21 +256,29 @@ struct websock_socket : socket_interface
 
     virtual void shutdown() override
     {
+        std::lock_guard guard(mut);
+
         ws.close(boost::beast::websocket::close_code::normal, lec);
     }
 
     virtual bool is_open() override
     {
+        std::lock_guard guard(mut);
+
         return ws.is_open();
     }
 
     virtual int available() override
     {
+        std::lock_guard guard(mut);
+
         return ws.next_layer().available();
     }
 
     virtual void ping(const std::string& payload) override
     {
+        std::lock_guard guard(mut);
+
         ws.ping(payload.c_str());
     }
 
@@ -292,9 +300,9 @@ struct ssl_ctx_wrap
 
         ///remember to deploy these!
         ///certpw1234
-        std::string cert = read_file_bin("./deps/secret/cert/cert.crt");
-        std::string dh = read_file_bin("./deps/secret/cert/dh.pem");
-        std::string key = read_file_bin("./deps/secret/cert/key.pem");
+        static std::string cert = read_file_bin("./deps/secret/cert/cert.crt");
+        static std::string dh = read_file_bin("./deps/secret/cert/dh.pem");
+        static std::string key = read_file_bin("./deps/secret/cert/key.pem");
 
         ctx.set_options(boost::asio::ssl::context::default_workarounds |
                         boost::asio::ssl::context::no_sslv2 |
@@ -424,6 +432,8 @@ struct websock_socket_ssl : socket_interface
 
     virtual void ping(const std::string& payload) override
     {
+        std::lock_guard guard(mut);
+
         ws.ping(payload.c_str());
     }
 
