@@ -97,12 +97,14 @@ struct shared_context
     }
 };
 
+#define SLEEP_TIME 4
+
 void handle_async_write(c_shared_data shared, shared_context& ctx)
 {
     while(1)
     {
         //std::lock_guard<std::mutex> lk(local_mut);
-        sf::sleep(sf::milliseconds(8));
+        //sf::sleep(sf::milliseconds(SLEEP_TIME));
 
         if(sd_should_terminate(shared))
             break;
@@ -110,7 +112,10 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
         try
         {
             if(!socket_alive)
+            {
+                sf::sleep(sf::milliseconds(SLEEP_TIME));
                 continue;
+            }
 
             if(sd_has_front_write(shared))
             {
@@ -123,6 +128,10 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
                     socket_alive = false;
                     continue;
                 }
+            }
+            else
+            {
+                sf::sleep(sf::milliseconds(SLEEP_TIME));
             }
         }
         catch(...)
@@ -172,22 +181,27 @@ void handle_async_read(c_shared_data shared, shared_context& ctx)
 
     while(1)
     {
-        sf::sleep(sf::milliseconds(8));
-
         if(sd_should_terminate(shared))
             break;
 
         try
         {
             if(!socket_alive)
+            {
+                sf::sleep(sf::milliseconds(SLEEP_TIME));
                 continue;
+            }
 
             if(ctx.sock->available() == 0)
+            {
+                sf::sleep(sf::milliseconds(SLEEP_TIME));
                 continue;
+            }
 
             if(ctx.sock->read(ec))
             {
                 socket_alive = false;
+                sf::sleep(sf::milliseconds(SLEEP_TIME));
                 continue;
             }
 
