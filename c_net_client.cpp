@@ -147,7 +147,7 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
     printf("write\n");
 }
 
-void check_auth(c_shared_data shared, const std::string& str)
+bool check_auth(c_shared_data shared, const std::string& str)
 {
     std::string auth_str = "command_auth secret ";
 
@@ -165,12 +165,16 @@ void check_auth(c_shared_data shared, const std::string& str)
             sd_set_auth(shared, make_view(key));
 
             sd_add_back_read(shared, make_view("command " + make_success_col("Success! Try user lowercase_name to get started, and then #scripts.core()")));
+
+            return true;
         }
         else
         {
             printf("Key file already exists");
 
             sd_add_back_read(shared, make_view("command " + make_error_col("Did not overwrite existing key file, you are already registered")));
+
+            return false;
         }
     }
 }
@@ -207,7 +211,9 @@ void handle_async_read(c_shared_data shared, shared_context& ctx)
 
             std::string next_command = ctx.sock->get_read();
 
-            check_auth(shared, next_command);
+            if(!check_auth(shared, next_command))
+                continue;
+
             sd_add_back_read(shared, make_view(next_command));
         }
         catch(...)
