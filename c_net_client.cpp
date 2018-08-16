@@ -176,6 +176,13 @@ bool check_auth(c_shared_data shared, const std::string& str)
 
             sd_add_back_read(shared, make_view("command " + make_error_col("Did not overwrite existing key file, you are already registered")));
 
+            ///reauth
+            sized_string auth = sd_get_auth(shared);
+            std::string auth_str = "client_command auth client " + c_str_sized_to_cpp(auth);
+            free_sized_string(auth);
+
+            sd_add_back_write(shared, make_view(auth_str));
+
             return false;
         }
     }
