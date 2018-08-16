@@ -186,6 +186,8 @@ bool check_auth(c_shared_data shared, const std::string& str)
             return false;
         }
     }
+
+    return true;
 }
 
 void handle_async_read(c_shared_data shared, shared_context& ctx)
@@ -220,8 +222,7 @@ void handle_async_read(c_shared_data shared, shared_context& ctx)
 
             std::string next_command = ctx.sock->get_read();
 
-            if(!check_auth(shared, next_command))
-                continue;
+            check_auth(shared, next_command);
 
             sd_add_back_read(shared, make_view(next_command));
         }
