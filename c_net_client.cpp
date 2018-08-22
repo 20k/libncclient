@@ -52,6 +52,8 @@ struct shared_context
         if(sock)
             delete sock;
 
+        sock = nullptr;
+
         if(!use_ssl)
         {
             websock_socket_client* tsock = nullptr;
