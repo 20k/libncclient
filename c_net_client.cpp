@@ -52,6 +52,8 @@ struct shared_context
         if(sock)
             delete sock;
 
+        sock = nullptr;
+
         if(!use_ssl)
         {
             websock_socket_client* tsock = nullptr;
@@ -97,12 +99,14 @@ struct shared_context
     }
 };
 
+#define SLEEP_TIME 4
+
 void handle_async_write(c_shared_data shared, shared_context& ctx)
 {
     while(1)
     {
         //std::lock_guard<std::mutex> lk(local_mut);
-        sf::sleep(sf::milliseconds(8));
+        //sf::sleep(sf::milliseconds(SLEEP_TIME));
 
         if(sd_should_terminate(shared))
             break;
@@ -110,7 +114,10 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
         try
         {
             if(!socket_alive)
+            {
+                sf::sleep(sf::milliseconds(SLEEP_TIME));
                 continue;
+            }
 
             if(sd_has_front_write(shared))
             {
@@ -123,6 +130,10 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
                     socket_alive = false;
                     continue;
                 }
+            }
+            else
+            {
+                sf::sleep(sf::milliseconds(SLEEP_TIME));
             }
         }
         catch(...)
@@ -138,7 +149,7 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
     printf("write\n");
 }
 
-void check_auth(c_shared_data shared, const std::string& str)
+bool check_auth(c_shared_data shared, const std::string& str)
 {
     std::string auth_str = "command_auth secret ";
 
@@ -156,14 +167,29 @@ void check_auth(c_shared_data shared, const std::string& str)
             sd_set_auth(shared, make_view(key));
 
             sd_add_back_read(shared, make_view("command " + make_success_col("Success! Try user lowercase_name to get started, and then #scripts.core()")));
+
+            printf("Wrote key file\n");
+
+            return true;
         }
         else
         {
-            printf("Key file already exists");
+            printf("Key file already exists\n");
 
             sd_add_back_read(shared, make_view("command " + make_error_col("Did not overwrite existing key file, you are already registered")));
+
+            ///reauth
+            sized_string auth = sd_get_auth(shared);
+            std::string auth_str = "client_command auth client " + c_str_sized_to_cpp(auth);
+            free_sized_string(auth);
+
+            sd_add_back_write(shared, make_view(auth_str));
+
+            return false;
         }
     }
+
+    return true;
 }
 
 void handle_async_read(c_shared_data shared, shared_context& ctx)
@@ -172,28 +198,34 @@ void handle_async_read(c_shared_data shared, shared_context& ctx)
 
     while(1)
     {
-        sf::sleep(sf::milliseconds(8));
-
         if(sd_should_terminate(shared))
             break;
 
         try
         {
             if(!socket_alive)
+            {
+                sf::sleep(sf::milliseconds(SLEEP_TIME));
                 continue;
+            }
 
             if(ctx.sock->available() == 0)
+            {
+                sf::sleep(sf::milliseconds(SLEEP_TIME));
                 continue;
+            }
 
             if(ctx.sock->read(ec))
             {
                 socket_alive = false;
+                sf::sleep(sf::milliseconds(SLEEP_TIME));
                 continue;
             }
 
             std::string next_command = ctx.sock->get_read();
 
             check_auth(shared, next_command);
+
             sd_add_back_read(shared, make_view(next_command));
         }
         catch(...)
