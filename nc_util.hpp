@@ -290,6 +290,40 @@ std::string colour_string(const std::string& in)
 }
 
 inline
+std::string colour_string_only_alnum(std::string in)
+{
+    std::string f;
+
+    int first_alpha = -1;
+
+    for(int i=0; i < (int)in.size(); i++)
+    {
+        if(std::isalnum(in[i]))
+        {
+            f.push_back(in[i]);
+
+            if(first_alpha == -1)
+                first_alpha = i;
+        }
+    }
+
+    std::string col = string_to_colour(f);
+
+    if(first_alpha >= 0 && first_alpha < (int)in.size())
+    {
+        in = "`" + col + in;
+        //in.insert(first_alpha, "`" + col);
+        in += "`";
+    }
+    else
+    {
+        return colour_string(in);
+    }
+
+    return in;
+}
+
+inline
 std::string get_host_from_fullname(const std::string& in)
 {
     auto found = no_ss_split(in, ".");
