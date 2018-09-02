@@ -260,6 +260,12 @@ std::string make_notif_col(const std::string& in)
 }
 
 inline
+std::string make_gray_col(const std::string& in)
+{
+    return "`b" + in + "`";
+}
+
+inline
 std::string make_key_val(const std::string& key, const std::string& val)
 {
     return make_key_col(key) + ":" + make_val_col(val);
