@@ -147,6 +147,18 @@ std::vector<std::string> no_ss_split(const std::string& str, const std::string& 
     return tokens;
 }
 
+inline
+std::string tolower_str(std::string str)
+{
+    for(int i=0; i < (int)str.size(); i++)
+    {
+        str[i] = tolower(str[i]);
+    }
+
+    ///no rvo on returning a parameter
+    return std::move(str);
+}
+
 #define MAX_ANY_NAME_LEN 24
 
 inline
