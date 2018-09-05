@@ -292,6 +292,21 @@ std::string string_to_colour(const std::string& in)
     if(in == "extern")
         return "H";
 
+    if(tolower_str(in) == "fullsec")
+        return "4";
+
+    if(tolower_str(in) == "highsec")
+        return "3";
+
+    if(tolower_str(in) == "midsec")
+        return "2";
+
+    if(tolower_str(in) == "lowsec")
+        return "1";
+
+    if(tolower_str(in) == "nullsec")
+        return "0";
+
     std::string valid_cols = "ABCDEFGHIJKLNOPSTVWXYdefghijlnpqsw";
 
     size_t hsh = std::hash<std::string>{}(in);
