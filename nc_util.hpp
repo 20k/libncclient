@@ -105,6 +105,15 @@ std::string strip_whitespace(std::string in)
     return in;
 }
 
+inline
+std::string strip_trailing_newlines(std::string in)
+{
+    while(in.size() > 0 && in.back() == '\n')
+        in.pop_back();
+
+    return std::move(in);
+}
+
 template<typename T>
 inline
 bool starts_with(const T& in, const std::string& test)
