@@ -6,6 +6,7 @@
 #include <sstream>
 #include <fstream>
 #include <algorithm>
+#include <cmath>
 
 inline
 std::string read_file(const std::string& file)
@@ -84,6 +85,32 @@ std::string format_by_vector(std::string to_format, const std::vector<std::strin
     }
 
     return to_format;
+}
+
+template<typename T>
+inline
+std::string to_string_with_enforced_variable_dp(T a_value, int forced_dp = 1)
+{
+    if(fabs(a_value) <= 0.0999999 && fabs(a_value) >= 0.0001)
+        forced_dp++;
+
+    std::string fstr = std::to_string(a_value);
+
+    auto found = fstr.find('.');
+
+    if(found == std::string::npos)
+    {
+        return fstr + ".0";
+    }
+
+    found += forced_dp + 1;
+
+    if(found >= fstr.size())
+        return fstr;
+
+    fstr.resize(found);
+
+    return fstr;
 }
 
 inline
