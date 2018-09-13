@@ -351,6 +351,45 @@ std::string string_to_colour(const std::string& in)
 }
 
 inline
+int seclevel_fraction_to_seclevel(float seclevel_fraction)
+{
+    if(seclevel_fraction < 0.2)
+        return 0;
+
+    if(seclevel_fraction < 0.4)
+        return 1;
+
+    if(seclevel_fraction < 0.6)
+        return 2;
+
+    if(seclevel_fraction < 0.8)
+        return 3;
+
+    return 4;
+}
+
+inline
+std::string seclevel_to_string(int seclevel)
+{
+    if(seclevel == 0)
+        return "nullsec";
+
+    if(seclevel == 1)
+        return "lowsec";
+
+    if(seclevel == 2)
+        return "midsec";
+
+    if(seclevel == 3)
+        return "highsec";
+
+    if(seclevel == 4)
+        return "fullsec";
+
+    return "nullsec";
+}
+
+inline
 std::string colour_string(const std::string& in)
 {
     std::string c = string_to_colour(in);
