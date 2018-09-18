@@ -369,6 +369,24 @@ int seclevel_fraction_to_seclevel(float seclevel_fraction)
 }
 
 inline
+float seclevel_to_seclevel_fraction_lowerbound(int seclevel)
+{
+    if(seclevel <= 0)
+        return 0.f;
+
+    if(seclevel == 1)
+        return 0.2f;
+
+    if(seclevel == 2)
+        return 0.4f;
+
+    if(seclevel == 3)
+        return 0.6f;
+
+    return 0.8f;
+}
+
+inline
 std::string seclevel_to_string(int seclevel)
 {
     if(seclevel == 0)
