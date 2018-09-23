@@ -278,6 +278,18 @@ std::string get_script_from_name_string(const std::string& base_dir, const std::
 }
 
 inline
+std::string make_item_col(const std::string& in)
+{
+    return "`P" + in + "`";
+}
+
+inline
+std::string make_cash_col(const std::string& in)
+{
+    return "`H" + in + "`";
+}
+
+inline
 std::string make_error_col(const std::string& in)
 {
     return "`D" + in + "`";
@@ -405,6 +417,14 @@ std::string seclevel_to_string(int seclevel)
         return "fullsec";
 
     return "nullsec";
+}
+
+inline
+std::string seclevel_fraction_to_colour(float seclevel_fraction)
+{
+    int isec = seclevel_fraction_to_seclevel(seclevel_fraction);
+
+    return string_to_colour(seclevel_to_string(isec));
 }
 
 inline
