@@ -138,7 +138,7 @@ std::string strip_trailing_newlines(std::string in)
     while(in.size() > 0 && in.back() == '\n')
         in.pop_back();
 
-    return std::move(in);
+    return in;
 }
 
 template<typename T>
@@ -192,7 +192,7 @@ std::string tolower_str(std::string str)
     }
 
     ///no rvo on returning a parameter
-    return std::move(str);
+    return str;
 }
 
 #define MAX_ANY_NAME_LEN 24
