@@ -436,6 +436,15 @@ std::string colour_string(const std::string& in)
 }
 
 inline
+std::string colour_string_if(const std::string& in, bool condition)
+{
+    if(condition)
+        return colour_string(in);
+    else
+        return in;
+}
+
+inline
 std::string colour_string_only_alnum(std::string in)
 {
     std::string f;
