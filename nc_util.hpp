@@ -355,6 +355,21 @@ std::string string_to_colour(const std::string& in)
     if(tolower_str(in) == "nullsec")
         return "0";
 
+    if(tolower_str(in) == "fs")
+        return "4";
+
+    if(tolower_str(in) == "hs")
+        return "3";
+
+    if(tolower_str(in) == "ms")
+        return "2";
+
+    if(tolower_str(in) == "ls")
+        return "1";
+
+    if(tolower_str(in) == "ns")
+        return "0";
+
     std::string valid_cols = "ABCDEFGHIJKLNOPSTVWXYdefghijlnpqsw";
 
     size_t hsh = std::hash<std::string>{}(in);
