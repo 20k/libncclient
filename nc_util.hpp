@@ -8,6 +8,9 @@
 #include <algorithm>
 #include <cmath>
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 inline
 std::string read_file(const std::string& file)
 {
@@ -47,6 +50,45 @@ bool file_exists(const std::string& name)
 {
     std::ifstream f(name.c_str());
     return f.good();
+}
+
+template<typename T>
+inline
+void atomic_write_all(const std::string& file, const T& data)
+{
+    std::string atomic_extension = ".atom";
+    std::string atomic_file = file + atomic_extension;
+    std::string backup_file = file + ".back";
+
+    auto my_file = std::fstream(atomic_file, std::ios::out | std::ios::binary);
+
+    my_file.write((const char*)&data[0], data.size());
+    my_file.close();
+
+    if(!file_exists(file))
+    {
+        rename(atomic_file.c_str(), file.c_str());
+        return;
+    }
+
+    bool err = ReplaceFileA(file.c_str(), atomic_file.c_str(), backup_file.c_str(), REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr) == 0;
+
+    if(err)
+    {
+        printf("atomic write error %i", GetLastError());
+
+        throw std::runtime_error("Explod in atomic write");
+    }
+}
+
+template<typename T>
+inline
+void no_atomic_write_all(const std::string& file, const T& data)
+{
+    auto my_file = std::fstream(file, std::ios::out | std::ios::binary);
+
+    my_file.write((const char*)&data[0], data.size());
+    my_file.close();
 }
 
 inline
