@@ -75,7 +75,7 @@ void atomic_write_all(const std::string& file, const T& data)
 
     if(err)
     {
-        printf("atomic write error %i", GetLastError());
+        printf("atomic write error %lui", GetLastError());
 
         throw std::runtime_error("Explod in atomic write");
     }
