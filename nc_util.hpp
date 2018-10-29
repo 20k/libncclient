@@ -7,6 +7,7 @@
 #include <fstream>
 #include <algorithm>
 #include <cmath>
+#include <SFML/Graphics.hpp>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -71,13 +72,37 @@ void atomic_write_all(const std::string& file, const T& data)
         return;
     }
 
-    bool err = ReplaceFileA(file.c_str(), atomic_file.c_str(), backup_file.c_str(), REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr) == 0;
+    sf::Clock clk;
 
-    if(err)
+    bool write_success = false;
+    bool any_errors = false;
+
+    do
     {
-        printf("atomic write error %lui", GetLastError());
+        bool err = ReplaceFileA(file.c_str(), atomic_file.c_str(), backup_file.c_str(), REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr) == 0;
 
+        if(!err)
+        {
+            write_success = true;
+            break;
+        }
+
+        if(err)
+        {
+            printf("atomic write error %lu ", GetLastError());
+            any_errors = true;
+        }
+    }
+    while(clk.getElapsedTime().asMilliseconds() < 1000);
+
+    if(!write_success)
+    {
         throw std::runtime_error("Explod in atomic write");
+    }
+
+    if(any_errors)
+    {
+        printf("atomic_write had errors but recovered");
     }
 }
 
