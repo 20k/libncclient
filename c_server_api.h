@@ -48,6 +48,7 @@ extern "C"
         server_command_command_realtime,
         server_command_command_tagged,
         server_command_command_ping,
+        server_command_command_no_pad,
         error_invalid_response,
     } server_command_type;
 
@@ -135,6 +136,7 @@ extern "C"
     __declspec(dllexport) server_command_info sa_server_response_to_info(sized_view server_response);
 
     ///server_command_command
+    ///also accepts command_no_pad
     __declspec(dllexport) sized_string sa_command_to_human_readable(server_command_info info);
 
     __declspec(dllexport) realtime_info sa_command_realtime_to_info(server_command_info info);

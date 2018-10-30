@@ -41,11 +41,11 @@
 					<Add option="-g" />
 				</Compiler>
 				<Linker>
-					<Add option="-lboost_system-mgw73-mt-x64-1_67" />
+					<Add option="-lboost_system-mt" />
 					<Add option="-lsfml-system" />
 					<Add option="-lws2_32" />
 					<Add option="-lmswsock" />
-					<Add option="-lboost_filesystem-mgw73-mt-x64-1_67" />
+					<Add option="-lboost_filesystem-mt" />
 					<Add option="-lcrypto" />
 					<Add option="-lssl" />
 				</Linker>
@@ -103,6 +103,7 @@
 			<envvars />
 			<debugger />
 			<lib_finder disable_auto="1" />
+			<fortran_project />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

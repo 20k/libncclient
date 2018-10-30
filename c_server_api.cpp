@@ -280,6 +280,7 @@ server_command_info sa_server_response_to_info(sized_view server_response)
         return {error_invalid_response, {}};
 
     std::string command_str = "command ";
+    std::string command_no_pad_str = "command_no_pad ";
     std::string realtime_str = "command_realtime_json ";
     std::string chat_api = "chat_api_json ";
     std::string scriptargs = "server_scriptargs_json ";
@@ -298,6 +299,7 @@ server_command_info sa_server_response_to_info(sized_view server_response)
     dat.push_back({server_command_server_scriptargs_ratelimit, ratelimit_str});
     dat.push_back({server_command_command_tagged, command_tagged_str});
     dat.push_back({server_command_command_ping, command_ping_str});
+    dat.push_back({server_command_command_no_pad, command_no_pad_str});
 
     std::string str = c_str_sized_to_cpp(server_response);
 
