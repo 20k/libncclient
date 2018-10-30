@@ -6,6 +6,11 @@
 #include <sstream>
 #include <fstream>
 #include <algorithm>
+#include <cmath>
+#include <SFML/Graphics.hpp>
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 inline
 std::string read_file(const std::string& file)
@@ -48,6 +53,69 @@ bool file_exists(const std::string& name)
     return f.good();
 }
 
+template<typename T>
+inline
+void atomic_write_all(const std::string& file, const T& data)
+{
+    std::string atomic_extension = ".atom";
+    std::string atomic_file = file + atomic_extension;
+    std::string backup_file = file + ".back";
+
+    auto my_file = std::fstream(atomic_file, std::ios::out | std::ios::binary);
+
+    my_file.write((const char*)&data[0], data.size());
+    my_file.close();
+
+    if(!file_exists(file))
+    {
+        rename(atomic_file.c_str(), file.c_str());
+        return;
+    }
+
+    sf::Clock clk;
+
+    bool write_success = false;
+    bool any_errors = false;
+
+    do
+    {
+        bool err = ReplaceFileA(file.c_str(), atomic_file.c_str(), backup_file.c_str(), REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr) == 0;
+
+        if(!err)
+        {
+            write_success = true;
+            break;
+        }
+
+        if(err)
+        {
+            printf("atomic write error %lu ", GetLastError());
+            any_errors = true;
+        }
+    }
+    while(clk.getElapsedTime().asMilliseconds() < 1000);
+
+    if(!write_success)
+    {
+        throw std::runtime_error("Explod in atomic write");
+    }
+
+    if(any_errors)
+    {
+        printf("atomic_write had errors but recovered");
+    }
+}
+
+template<typename T>
+inline
+void no_atomic_write_all(const std::string& file, const T& data)
+{
+    auto my_file = std::fstream(file, std::ios::out | std::ios::binary);
+
+    my_file.write((const char*)&data[0], data.size());
+    my_file.close();
+}
+
 inline
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems)
 {
@@ -86,6 +154,32 @@ std::string format_by_vector(std::string to_format, const std::vector<std::strin
     return to_format;
 }
 
+template<typename T>
+inline
+std::string to_string_with_enforced_variable_dp(T a_value, int forced_dp = 1)
+{
+    if(fabs(a_value) <= 0.0999999 && fabs(a_value) >= 0.0001)
+        forced_dp++;
+
+    std::string fstr = std::to_string(a_value);
+
+    auto found = fstr.find('.');
+
+    if(found == std::string::npos)
+    {
+        return fstr + ".0";
+    }
+
+    found += forced_dp + 1;
+
+    if(found >= fstr.size())
+        return fstr;
+
+    fstr.resize(found);
+
+    return fstr;
+}
+
 inline
 std::string strip_whitespace(std::string in)
 {
@@ -101,6 +195,15 @@ std::string strip_whitespace(std::string in)
     {
         in.pop_back();
     }
+
+    return in;
+}
+
+inline
+std::string strip_trailing_newlines(std::string in)
+{
+    while(in.size() > 0 && in.back() == '\n')
+        in.pop_back();
 
     return in;
 }
@@ -145,6 +248,18 @@ std::vector<std::string> no_ss_split(const std::string& str, const std::string& 
     }
     while (pos < str.length() && prev < str.length());
     return tokens;
+}
+
+inline
+std::string tolower_str(std::string str)
+{
+    for(int i=0; i < (int)str.size(); i++)
+    {
+        str[i] = tolower(str[i]);
+    }
+
+    ///no rvo on returning a parameter
+    return str;
 }
 
 #define MAX_ANY_NAME_LEN 24
@@ -230,6 +345,18 @@ std::string get_script_from_name_string(const std::string& base_dir, const std::
 }
 
 inline
+std::string make_item_col(const std::string& in)
+{
+    return "`P" + in + "`";
+}
+
+inline
+std::string make_cash_col(const std::string& in)
+{
+    return "`H" + in + "`";
+}
+
+inline
 std::string make_error_col(const std::string& in)
 {
     return "`D" + in + "`";
@@ -260,6 +387,12 @@ std::string make_notif_col(const std::string& in)
 }
 
 inline
+std::string make_gray_col(const std::string& in)
+{
+    return "`b" + in + "`";
+}
+
+inline
 std::string make_key_val(const std::string& key, const std::string& val)
 {
     return make_key_col(key) + ":" + make_val_col(val);
@@ -274,6 +407,36 @@ std::string string_to_colour(const std::string& in)
     if(in == "extern")
         return "H";
 
+    if(tolower_str(in) == "fullsec")
+        return "4";
+
+    if(tolower_str(in) == "highsec")
+        return "3";
+
+    if(tolower_str(in) == "midsec")
+        return "2";
+
+    if(tolower_str(in) == "lowsec")
+        return "1";
+
+    if(tolower_str(in) == "nullsec")
+        return "0";
+
+    if(tolower_str(in) == "fs")
+        return "4";
+
+    if(tolower_str(in) == "hs")
+        return "3";
+
+    if(tolower_str(in) == "ms")
+        return "2";
+
+    if(tolower_str(in) == "ls")
+        return "1";
+
+    if(tolower_str(in) == "ns")
+        return "0";
+
     std::string valid_cols = "ABCDEFGHIJKLNOPSTVWXYdefghijlnpqsw";
 
     size_t hsh = std::hash<std::string>{}(in);
@@ -282,11 +445,119 @@ std::string string_to_colour(const std::string& in)
 }
 
 inline
+int seclevel_fraction_to_seclevel(float seclevel_fraction)
+{
+    if(seclevel_fraction < 0.2)
+        return 0;
+
+    if(seclevel_fraction < 0.4)
+        return 1;
+
+    if(seclevel_fraction < 0.6)
+        return 2;
+
+    if(seclevel_fraction < 0.8)
+        return 3;
+
+    return 4;
+}
+
+inline
+float seclevel_to_seclevel_fraction_lowerbound(int seclevel)
+{
+    if(seclevel <= 0)
+        return 0.f;
+
+    if(seclevel == 1)
+        return 0.2f;
+
+    if(seclevel == 2)
+        return 0.4f;
+
+    if(seclevel == 3)
+        return 0.6f;
+
+    return 0.8f;
+}
+
+inline
+std::string seclevel_to_string(int seclevel)
+{
+    if(seclevel == 0)
+        return "nullsec";
+
+    if(seclevel == 1)
+        return "lowsec";
+
+    if(seclevel == 2)
+        return "midsec";
+
+    if(seclevel == 3)
+        return "highsec";
+
+    if(seclevel == 4)
+        return "fullsec";
+
+    return "nullsec";
+}
+
+inline
+std::string seclevel_fraction_to_colour(float seclevel_fraction)
+{
+    int isec = seclevel_fraction_to_seclevel(seclevel_fraction);
+
+    return string_to_colour(seclevel_to_string(isec));
+}
+
+inline
 std::string colour_string(const std::string& in)
 {
     std::string c = string_to_colour(in);
 
     return "`" + c + in + "`";
+}
+
+inline
+std::string colour_string_if(const std::string& in, bool condition)
+{
+    if(condition)
+        return colour_string(in);
+    else
+        return in;
+}
+
+inline
+std::string colour_string_only_alnum(std::string in)
+{
+    std::string f;
+
+    int first_alpha = -1;
+
+    for(int i=0; i < (int)in.size(); i++)
+    {
+        if(std::isalnum(in[i]))
+        {
+            f.push_back(in[i]);
+
+            if(first_alpha == -1)
+                first_alpha = i;
+        }
+    }
+
+    std::string col = string_to_colour(f);
+
+    if(first_alpha >= 0 && first_alpha < (int)in.size())
+    {
+        in = "`" + col + in;
+        //in.insert(first_alpha, "`" + col);
+        in += "`";
+    }
+    else
+    {
+        return colour_string(in);
+    }
+
+    return in;
 }
 
 inline
