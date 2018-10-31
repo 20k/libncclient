@@ -49,6 +49,7 @@ extern "C"
         server_command_command_tagged,
         server_command_command_ping,
         server_command_command_no_pad,
+        server_command_command_down,
         error_invalid_response,
     } server_command_type;
 
@@ -127,11 +128,18 @@ extern "C"
         sized_string val;
     } command_tagged_info;
 
+    typedef struct
+    {
+        sized_string full_name;
+        sized_string script_data;
+    } command_down_info;
+
     __declspec(dllexport) void sa_destroy_server_command_info(server_command_info info);
     __declspec(dllexport) void sa_destroy_realtime_info(realtime_info info);
     __declspec(dllexport) void sa_destroy_chat_api_info(chat_api_info info);
     __declspec(dllexport) void sa_destroy_script_argument_list(script_argument_list argl);
     __declspec(dllexport) void sa_destroy_command_tagged_info(command_tagged_info info);
+    __declspec(dllexport) void sa_destroy_command_down_info(command_down_info info);
 
     __declspec(dllexport) server_command_info sa_server_response_to_info(sized_view server_response);
 
@@ -156,6 +164,9 @@ extern "C"
 
     ///server_command_command_tagged
     __declspec(dllexport) command_tagged_info sa_command_tagged_to_info(server_command_info info);
+
+    ///server_command_command_down
+    __declspec(dllexport) command_down_info sa_command_down_to_info(server_command_info info);
 
 #ifdef __cplusplus
 }
