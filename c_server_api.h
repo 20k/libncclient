@@ -107,6 +107,7 @@ extern "C"
         int num_notifs;
 
         sized_string current_user;
+        sized_string root_user; ///for scripts
     } chat_api_info;
 
     typedef struct

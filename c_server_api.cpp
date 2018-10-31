@@ -510,6 +510,17 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
             ret.current_user = make_copy("");
         }
 
+        if(full.count("root_user") > 0)
+        {
+            std::string cpp_user = full["root_user"];
+
+            ret.root_user = make_copy(cpp_user);
+        }
+        else
+        {
+            ret.root_user = make_copy("");
+        }
+
         return ret;
     }
     catch(...)
@@ -563,6 +574,7 @@ void sa_destroy_chat_api_info(chat_api_info info)
     }
 
     free_sized_string(info.current_user);
+    free_sized_string(info.root_user);
 }
 
 void sa_destroy_script_argument_list(script_argument_list argl)
