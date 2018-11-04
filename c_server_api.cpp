@@ -274,12 +274,19 @@ void sa_destroy_command_tagged_info(command_tagged_info info)
     free_sized_string(info.val);
 }
 
+void sa_destroy_command_down_info(command_down_info info)
+{
+    free_sized_string(info.full_name);
+    free_sized_string(info.script_data);
+}
+
 server_command_info sa_server_response_to_info(sized_view server_response)
 {
     if(server_response.str == nullptr || server_response.num <= 0)
         return {error_invalid_response, {}};
 
     std::string command_str = "command ";
+    std::string command_no_pad_str = "command_no_pad ";
     std::string realtime_str = "command_realtime_json ";
     std::string chat_api = "chat_api_json ";
     std::string scriptargs = "server_scriptargs_json ";
@@ -287,6 +294,7 @@ server_command_info sa_server_response_to_info(sized_view server_response)
     std::string ratelimit_str = "server_scriptargs_ratelimit_json ";
     std::string command_tagged_str = "command_tagged ";
     std::string command_ping_str = "command_ping";
+    std::string command_down_str = "command_down ";
 
     std::vector<std::pair<server_command_type, std::string>> dat;
 
@@ -298,6 +306,8 @@ server_command_info sa_server_response_to_info(sized_view server_response)
     dat.push_back({server_command_server_scriptargs_ratelimit, ratelimit_str});
     dat.push_back({server_command_command_tagged, command_tagged_str});
     dat.push_back({server_command_command_ping, command_ping_str});
+    dat.push_back({server_command_command_no_pad, command_no_pad_str});
+    dat.push_back({server_command_command_down, command_down_str});
 
     std::string str = c_str_sized_to_cpp(server_response);
 
@@ -500,6 +510,17 @@ chat_api_info sa_chat_api_to_info(server_command_info info)
             ret.current_user = make_copy("");
         }
 
+        if(full.count("root_user") > 0)
+        {
+            std::string cpp_user = full["root_user"];
+
+            ret.root_user = make_copy(cpp_user);
+        }
+        else
+        {
+            ret.root_user = make_copy("");
+        }
+
         return ret;
     }
     catch(...)
@@ -553,6 +574,7 @@ void sa_destroy_chat_api_info(chat_api_info info)
     }
 
     free_sized_string(info.current_user);
+    free_sized_string(info.root_user);
 }
 
 void sa_destroy_script_argument_list(script_argument_list argl)
@@ -691,3 +713,35 @@ command_tagged_info sa_command_tagged_to_info(server_command_info info)
 
     return ret;
 }
+
+
+command_down_info sa_command_down_to_info(server_command_info info)
+{
+    if(info.data.str == nullptr || info.data.num == 0)
+        return {};
+
+    std::string str = c_str_sized_to_cpp(info.data);
+
+    std::string full_name;
+
+    for(int i=0; i < str.size() && str[i] != ' '; i++)
+    {
+        full_name += str[i];
+    }
+
+    int idx = full_name.size() + 1;
+
+    std::string script_data;
+
+    for(int i=idx; i < str.size(); i++)
+    {
+        script_data += str[i];
+    }
+
+    command_down_info ret;
+    ret.full_name = make_copy(full_name);
+    ret.script_data = make_copy(script_data);
+
+    return ret;
+}
+

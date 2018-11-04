@@ -39,15 +39,19 @@
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-g" />
+					<Add option="-DSFML_STATIC" />
+					<Add directory="deps/SFML/include" />
 				</Compiler>
 				<Linker>
-					<Add option="-lboost_system-mgw73-mt-x64-1_67" />
-					<Add option="-lsfml-system" />
+					<Add option="-lboost_system-mt" />
+					<Add option="-lsfml-system-s" />
 					<Add option="-lws2_32" />
 					<Add option="-lmswsock" />
-					<Add option="-lboost_filesystem-mgw73-mt-x64-1_67" />
+					<Add option="-lboost_filesystem-mt" />
 					<Add option="-lcrypto" />
 					<Add option="-lssl" />
+					<Add option="-lwinmm" />
+					<Add directory="deps/SFML/lib" />
 				</Linker>
 				<ExtraCommands>
 					<Add after="Release.bat" />
@@ -103,6 +107,7 @@
 			<envvars />
 			<debugger />
 			<lib_finder disable_auto="1" />
+			<fortran_project />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
