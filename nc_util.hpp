@@ -19,6 +19,9 @@ std::string read_file(const std::string& file)
     std::string str((std::istreambuf_iterator<char>(t)),
                      std::istreambuf_iterator<char>());
 
+    if(!t.good())
+        throw std::runtime_error("Could not open file " + file);
+
     return str;
 }
 
@@ -42,6 +45,9 @@ std::string read_file_bin(const std::string& file)
     std::ifstream t(file, std::ios::binary);
     std::string str((std::istreambuf_iterator<char>(t)),
                      std::istreambuf_iterator<char>());
+
+    if(!t.good())
+        throw std::runtime_error("Could not open file " + file);
 
     return str;
 }
