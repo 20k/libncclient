@@ -295,6 +295,7 @@ server_command_info sa_server_response_to_info(sized_view server_response)
     std::string command_tagged_str = "command_tagged ";
     std::string command_ping_str = "command_ping";
     std::string command_down_str = "command_down ";
+    std::string chat_api_response_str = "chat_api_response ";
 
     std::vector<std::pair<server_command_type, std::string>> dat;
 
@@ -308,6 +309,7 @@ server_command_info sa_server_response_to_info(sized_view server_response)
     dat.push_back({server_command_command_ping, command_ping_str});
     dat.push_back({server_command_command_no_pad, command_no_pad_str});
     dat.push_back({server_command_command_down, command_down_str});
+    dat.push_back({server_command_chat_api_response, chat_api_response_str});
 
     std::string str = c_str_sized_to_cpp(server_response);
 

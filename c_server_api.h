@@ -50,6 +50,7 @@ extern "C"
         server_command_command_ping,
         server_command_command_no_pad,
         server_command_command_down,
+        server_command_chat_api_response,
         error_invalid_response,
     } server_command_type;
 
