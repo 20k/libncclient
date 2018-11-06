@@ -19,6 +19,9 @@ std::string read_file(const std::string& file)
     std::string str((std::istreambuf_iterator<char>(t)),
                      std::istreambuf_iterator<char>());
 
+    if(!t.good())
+        throw std::runtime_error("Could not open file " + file);
+
     return str;
 }
 
@@ -43,6 +46,9 @@ std::string read_file_bin(const std::string& file)
     std::string str((std::istreambuf_iterator<char>(t)),
                      std::istreambuf_iterator<char>());
 
+    if(!t.good())
+        throw std::runtime_error("Could not open file " + file);
+
     return str;
 }
 
@@ -57,6 +63,9 @@ template<typename T>
 inline
 void atomic_write_all(const std::string& file, const T& data)
 {
+    if(data.size() == 0)
+        return;
+
     std::string atomic_extension = ".atom";
     std::string atomic_file = file + atomic_extension;
     std::string backup_file = file + ".back";
@@ -65,6 +74,11 @@ void atomic_write_all(const std::string& file, const T& data)
 
     my_file.write((const char*)&data[0], data.size());
     my_file.close();
+
+    /*HANDLE handle = CreateFile(atomic_file.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    WriteFile(handle, &data[0], data.size(), nullptr, nullptr);
+    FlushFileBuffers(handle);
+    CloseHandle(handle);*/
 
     if(!file_exists(file))
     {
@@ -80,6 +94,7 @@ void atomic_write_all(const std::string& file, const T& data)
     do
     {
         bool err = ReplaceFileA(file.c_str(), atomic_file.c_str(), backup_file.c_str(), REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr) == 0;
+        //bool err = ReplaceFileA(file.c_str(), atomic_file.c_str(), nullptr, REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr) == 0;
 
         if(!err)
         {
