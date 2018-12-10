@@ -1,5 +1,6 @@
 #include "c_steam_api.h"
 #include "c_shared_data.h"
+#include "nc_string_interop.hpp"
 
 #include <iostream>
 #include <vector>
@@ -47,6 +48,7 @@ struct steamapi
     bool auth_success();
     void pump_callbacks();
     bool is_overlay_open();
+    std::vector<uint8_t> get_encrypted_token();
 
 private:
     callback_environment secret_environment;
@@ -151,6 +153,11 @@ bool steamapi::is_overlay_open()
     return secret_environment.overlay_open;
 }
 
+std::vector<uint8_t> steamapi::get_encrypted_token()
+{
+    return secret_environment.encrypted_app_ticket;
+}
+
 __declspec(dllexport) c_steam_api steam_api_alloc()
 {
     return new steamapi();
@@ -167,4 +174,33 @@ __declspec(dllexport) void steam_api_destroy(c_steam_api csapi)
 __declspec(dllexport) void steam_api_request_encrypted_token(c_steam_api csapi)
 {
     csapi->handle_auth();
+}
+
+__declspec(dllexport) int steam_api_has_encrypted_token(c_steam_api csapi)
+{
+    return csapi->auth_success();
+}
+
+__declspec(dllexport) sized_string steam_api_get_encrypted_token(c_steam_api csapi)
+{
+    std::string str;
+
+    auto data = csapi->get_encrypted_token();
+
+    for(auto& i : data)
+    {
+        str.push_back(i);
+    }
+
+    return make_copy(str);
+}
+
+__declspec(dllexport) void steam_api_pump_events(c_steam_api csapi)
+{
+    csapi->pump_callbacks();
+}
+
+__declspec(dllexport) int steam_api_overlay_is_open(c_steam_api csapi)
+{
+    return csapi->is_overlay_open();
 }

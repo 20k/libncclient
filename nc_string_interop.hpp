@@ -3,6 +3,7 @@
 
 #include "c_shared_data.h"
 #include <cstring>
+#include <string>
 
 inline
 std::string c_str_consume(char* c)
