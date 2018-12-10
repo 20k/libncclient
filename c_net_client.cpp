@@ -149,9 +149,12 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
     printf("write\n");
 }
 
-bool check_auth(c_shared_data shared, const std::string& str)
+void check_auth(c_shared_data shared, const std::string& str)
 {
     std::string auth_str = "command_auth secret ";
+
+    if(str.size() < auth_str.size())
+        return;
 
     if(str.substr(0, auth_str.length()) == auth_str)
     {
@@ -169,8 +172,6 @@ bool check_auth(c_shared_data shared, const std::string& str)
             sd_add_back_read(shared, make_view("command " + make_success_col("Success! Try user lowercase_name to get started, and then #scripts.core()")));
 
             printf("Wrote key file\n");
-
-            return true;
         }
         else
         {
@@ -184,12 +185,8 @@ bool check_auth(c_shared_data shared, const std::string& str)
             free_sized_string(auth);
 
             sd_add_back_write(shared, make_view(auth_str));
-
-            return false;
         }
     }
-
-    return true;
 }
 
 void handle_async_read(c_shared_data shared, shared_context& ctx)
