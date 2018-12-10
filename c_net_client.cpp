@@ -360,7 +360,7 @@ __declspec(dllexport) void nc_start_ssl(c_shared_data data, const char* host_ip,
     std::thread(watchdog, data, std::ref(*ctx), hip, hpo).detach();
 }
 
-__declspec(dllexport) void nc_start_ssl_steam_auth(c_shared_data data, const char* host_ip, const char* host_port)
+__declspec(dllexport) void nc_start_ssl_steam_auth(c_shared_data data, c_steam_api csapi, const char* host_ip, const char* host_port)
 {
     std::string key_file = c_str_consume(sd_get_key_file_name(data));
 
@@ -369,7 +369,7 @@ __declspec(dllexport) void nc_start_ssl_steam_auth(c_shared_data data, const cha
         sd_set_auth(data, make_view(read_file_bin(key_file)));
     }
 
-    sd_set_use_steam_auth(data, 1);
+    sd_set_use_steam_auth(data, csapi);
 
     shared_context* ctx = new shared_context(true);
     ctx->data = data;

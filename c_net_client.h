@@ -2,6 +2,7 @@
 #define C_NET_CLIENT_H_INCLUDED
 
 #include "c_shared_data.h"
+#include "c_steam_api.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -18,7 +19,7 @@ extern "C"
 
     __declspec(dllexport) void nc_start(c_shared_data data, const char* host_ip, const char* host_port);
     __declspec(dllexport) void nc_start_ssl(c_shared_data data, const char* host_ip, const char* host_port);
-    __declspec(dllexport) void nc_start_ssl_steam_auth(c_shared_data data, const char* host_ip, const char* host_port);
+    __declspec(dllexport) void nc_start_ssl_steam_auth(c_shared_data data, c_steam_api csapi, const char* host_ip, const char* host_port);
 
     __declspec(dllexport) void nc_shutdown(c_shared_data data);
 

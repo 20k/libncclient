@@ -1,4 +1,5 @@
 #include "c_shared_data.h"
+#include "c_steam_api.h"
 #include "nc_util.hpp"
 #include "nc_string_interop.hpp"
 
@@ -19,15 +20,18 @@ struct shared_data
     volatile bool should_terminate = false;
     std::atomic_int termination_count{0};
     std::string key_file = "key.key";
-    bool use_steam_auth = true;
+    bool use_steam_auth = false;
+
+    c_steam_api csapi;
 
     std::mutex ilock;
 
-    void set_steam_auth(bool puse_steam_auth)
+    void set_steam_auth(c_steam_api pcsapi)
     {
         std::lock_guard<std::mutex> lk(ilock);
 
-        use_steam_auth = puse_steam_auth;
+        csapi = pcsapi;
+        use_steam_auth = true;
     }
 
     bool should_use_steam_auth()
@@ -262,9 +266,9 @@ __declspec(dllexport) int sd_get_termination_count(c_shared_data data)
     return data->termination_count;
 }
 
-__declspec(dllexport) void sd_set_use_steam_auth(c_shared_data data, int use_steam_auth)
+__declspec(dllexport) void sd_set_use_steam_auth(c_shared_data data, c_steam_api csapi)
 {
-    data->set_steam_auth(use_steam_auth);
+    data->set_steam_auth(csapi);
 }
 
 __declspec(dllexport) int sd_use_steam_auth(c_shared_data data)
