@@ -20,8 +20,23 @@ struct shared_data
     volatile bool should_terminate = false;
     std::atomic_int termination_count{0};
     std::string key_file = "key.key";
+    bool use_steam_auth = true;
 
     std::mutex ilock;
+
+    void set_steam_auth(bool puse_steam_auth)
+    {
+        std::lock_guard<std::mutex> lk(ilock);
+
+        use_steam_auth = puse_steam_auth;
+    }
+
+    bool should_use_steam_auth()
+    {
+        std::lock_guard<std::mutex> lk(ilock);
+
+        return use_steam_auth;
+    }
 
     void make_lock()
     {
@@ -232,6 +247,16 @@ __declspec(dllexport) void sd_increment_termination_count(c_shared_data data)
 __declspec(dllexport) int sd_get_termination_count(c_shared_data data)
 {
     return data->termination_count;
+}
+
+__declspec(dllexport) void sd_set_use_steam_auth(c_shared_data data, int use_steam_auth)
+{
+    data->set_steam_auth(use_steam_auth);
+}
+
+__declspec(dllexport) int sd_use_steam_auth(c_shared_data data)
+{
+    return data->should_use_steam_auth();
 }
 
 __declspec(dllexport) void free_string(char* c)

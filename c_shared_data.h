@@ -52,6 +52,9 @@ extern "C"
     __declspec(dllexport) void sd_increment_termination_count(c_shared_data data);
     __declspec(dllexport) int sd_get_termination_count(c_shared_data data);
 
+    __declspec(dllexport) void sd_set_use_steam_auth(c_shared_data data, int use_steam_auth);
+    __declspec(dllexport) int sd_use_steam_auth(c_shared_data datah);
+
     __declspec(dllexport) void free_string(char*);
     __declspec(dllexport) void free_sized_string(sized_string str);
 #ifdef __cplusplus
