@@ -716,7 +716,6 @@ command_tagged_info sa_command_tagged_to_info(server_command_info info)
     return ret;
 }
 
-
 command_down_info sa_command_down_to_info(server_command_info info)
 {
     if(info.data.str == nullptr || info.data.num == 0)

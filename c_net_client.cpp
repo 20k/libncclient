@@ -353,6 +353,28 @@ __declspec(dllexport) void nc_start_ssl(c_shared_data data, const char* host_ip,
     std::thread(watchdog, data, std::ref(*ctx), hip, hpo).detach();
 }
 
+__declspec(dllexport) void nc_start_ssl_steam_auth(c_shared_data data, const char* host_ip, const char* host_port)
+{
+    std::string key_file = c_str_consume(sd_get_key_file_name(data));
+
+    if(file_exists(key_file))
+    {
+        sd_set_auth(data, make_view(read_file_bin(key_file)));
+    }
+
+    sd_set_use_steam_auth(data, 1);
+
+    shared_context* ctx = new shared_context(true);
+    ctx->data = data;
+
+    std::string hip(host_ip);
+    std::string hpo(host_port);
+
+    std::thread(handle_async_read, data, std::ref(*ctx)).detach();
+    std::thread(handle_async_write, data, std::ref(*ctx)).detach();
+    std::thread(watchdog, data, std::ref(*ctx), hip, hpo).detach();
+}
+
 __declspec(dllexport) void nc_shutdown(c_shared_data data)
 {
     sd_set_termination(data);
