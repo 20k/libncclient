@@ -23,6 +23,7 @@ struct callback_environment
 
     bool has_ticket = false;
     bool auth_finished = false;
+    bool auth_in_progress = false;
     HAuthTicket hticket;
 
     bool has_encrypted_ticket = false;
@@ -49,6 +50,7 @@ struct steamapi
     void pump_callbacks();
     bool is_overlay_open();
     std::vector<uint8_t> get_encrypted_token();
+    bool should_wait_for_encrypted_token();
 
 private:
     callback_environment secret_environment;
@@ -74,6 +76,7 @@ void callback_environment::OnRequestEncryptedAppTicket( EncryptedAppTicketRespon
 		std::cout << "successfully got encrypted auth ticket of length " << encrypted_app_ticket.size() << std::endl;
 
 		has_encrypted_ticket = true;
+		auth_in_progress = false;
 
 		return;
 	}
@@ -91,6 +94,7 @@ void callback_environment::OnRequestEncryptedAppTicket( EncryptedAppTicketRespon
 	}
 
     std::cout << "Failed to get auth " << pEncryptedAppTicketResponse->m_eResult << std::endl;
+    auth_in_progress = false;
 }
 
 
@@ -128,6 +132,7 @@ void steamapi::handle_auth()
     SteamAPICall_t scall = SteamUser()->RequestEncryptedAppTicket(nullptr, 0);
     //hauthticket = SteamUser()->GetAuthSessionTicket(&ticket[0], ticket.size(), &real_ticket_size);
 
+    secret_environment.auth_in_progress = true;
     secret_environment.m_OnRequestEncryptedAppTicketCallResult.Set( scall, &secret_environment, &callback_environment::OnRequestEncryptedAppTicket );
 }
 
@@ -158,6 +163,11 @@ std::vector<uint8_t> steamapi::get_encrypted_token()
     return secret_environment.encrypted_app_ticket;
 }
 
+bool steamapi::should_wait_for_encrypted_token()
+{
+    return secret_environment.auth_in_progress;
+}
+
 __declspec(dllexport) c_steam_api steam_api_alloc()
 {
     return new steamapi();
@@ -174,6 +184,11 @@ __declspec(dllexport) void steam_api_destroy(c_steam_api csapi)
 __declspec(dllexport) void steam_api_request_encrypted_token(c_steam_api csapi)
 {
     csapi->handle_auth();
+}
+
+__declspec(dllexport) int steam_api_should_wait_for_encrypted_token(c_steam_api csapi)
+{
+    return csapi->should_wait_for_encrypted_token();
 }
 
 __declspec(dllexport) int steam_api_has_encrypted_token(c_steam_api csapi)
