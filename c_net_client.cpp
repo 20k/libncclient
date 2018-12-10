@@ -149,6 +149,22 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
     printf("write\n");
 }
 
+void handle_sending_auth(c_shared_data shared)
+{
+    if(sd_has_key_auth(shared))
+    {
+        sized_string auth = sd_get_auth(shared);
+        std::string auth_str = "client_command auth client " + c_str_sized_to_cpp(auth);
+        free_sized_string(auth);
+
+        sd_add_back_write(shared, make_view(auth_str));
+    }
+    else if(sd_use_steam_auth(shared))
+    {
+        ///steam
+    }
+}
+
 void check_auth(c_shared_data shared, const std::string& str)
 {
     std::string auth_str = "command_auth secret ";
@@ -179,12 +195,7 @@ void check_auth(c_shared_data shared, const std::string& str)
 
             sd_add_back_read(shared, make_view("command " + make_error_col("Did not overwrite existing key file, you are already registered")));
 
-            ///reauth
-            sized_string auth = sd_get_auth(shared);
-            std::string auth_str = "client_command auth client " + c_str_sized_to_cpp(auth);
-            free_sized_string(auth);
-
-            sd_add_back_write(shared, make_view(auth_str));
+            handle_sending_auth(shared);
         }
     }
 }
@@ -266,11 +277,7 @@ void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host
 
                 sd_add_back_read(shared, make_view_from_raw("`LConnected`"));
 
-                sized_string auth = sd_get_auth(shared);
-                std::string auth_str = "client_command auth client " + c_str_sized_to_cpp(auth);
-                free_sized_string(auth);
-
-                sd_add_back_write(shared, make_view(auth_str));
+                handle_sending_auth(shared);
 
                 sized_string username = sd_get_user(shared);
 

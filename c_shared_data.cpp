@@ -16,7 +16,6 @@ struct shared_data
     std::string user;
 
     std::string auth;
-    bool send_auth = false;
     volatile bool should_terminate = false;
     std::atomic_int termination_count{0};
     std::string key_file = "key.key";
@@ -36,6 +35,13 @@ struct shared_data
         std::lock_guard<std::mutex> lk(ilock);
 
         return use_steam_auth;
+    }
+
+    bool has_key_auth()
+    {
+        std::lock_guard<std::mutex> lk(ilock);
+
+        return auth.size() != 0;
     }
 
     void make_lock()
@@ -173,6 +179,13 @@ __declspec(dllexport) sized_string sd_get_key_file_name(c_shared_data data)
     shared_data* cdata = (shared_data*)data;
 
     return make_copy(cdata->get_key_file());
+}
+
+__declspec(dllexport) int sd_has_key_auth(c_shared_data data)
+{
+    shared_data* cdata = (shared_data*)data;
+
+    return cdata->has_key_auth();
 }
 
 __declspec(dllexport) int sd_has_front_read(c_shared_data data)
