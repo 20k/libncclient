@@ -276,6 +276,11 @@ __declspec(dllexport) int sd_use_steam_auth(c_shared_data data)
     return data->should_use_steam_auth();
 }
 
+__declspec(dllexport) c_steam_api sd_get_steam_auth(c_shared_data data)
+{
+    return data->csapi;
+}
+
 __declspec(dllexport) void free_string(char* c)
 {
     if(c == nullptr)

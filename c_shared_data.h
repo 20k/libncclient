@@ -58,6 +58,7 @@ extern "C"
 
     __declspec(dllexport) void sd_set_use_steam_auth(c_shared_data data, c_steam_api csapi);
     __declspec(dllexport) int sd_use_steam_auth(c_shared_data data);
+    __declspec(dllexport) c_steam_api sd_get_steam_auth(c_shared_data data);
 
     __declspec(dllexport) void free_string(char*);
     __declspec(dllexport) void free_sized_string(sized_string str);

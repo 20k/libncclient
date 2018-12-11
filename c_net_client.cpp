@@ -162,6 +162,23 @@ void handle_sending_auth(c_shared_data shared)
     else if(sd_use_steam_auth(shared))
     {
         ///steam
+        c_steam_api csapi = sd_get_steam_auth(shared);
+
+        steam_api_request_encrypted_token(csapi);
+
+        while(!steam_api_should_wait_for_encrypted_token(csapi)){}
+
+        if(!steam_api_has_encrypted_token(csapi))
+        {
+            printf("Failed to get encrypted token\n");
+            return;
+        }
+
+        sized_string str = steam_api_get_encrypted_token(csapi);
+
+        std::string to_send = "client_command auth_steam client_hex " + c_str_consume(str);
+
+        sd_add_back_write(shared, make_view(to_send));
     }
 }
 
@@ -251,6 +268,11 @@ void handle_async_read(c_shared_data shared, shared_context& ctx)
 
 void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host_ip, const std::string& host_port)
 {
+    if(sd_use_steam_auth(shared))
+    {
+        printf("Using Steam Auth\n");
+    }
+
     while(1)
     {
         if(socket_alive)
