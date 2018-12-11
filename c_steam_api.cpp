@@ -80,8 +80,6 @@ void callback_environment::OnRequestEncryptedAppTicket( EncryptedAppTicketRespon
 
 		encrypted_app_ticket.resize(cubTicket);
 
-		std::cout << "successfully got encrypted auth ticket of length " << encrypted_app_ticket.size() << std::endl;
-
 		has_encrypted_ticket = true;
 		auth_in_progress = false;
 
