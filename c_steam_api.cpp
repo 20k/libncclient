@@ -21,10 +21,10 @@ struct callback_environment
 
     bool overlay_open = false;
 
-    bool has_ticket = false;
-    bool auth_finished = false;
+    //bool has_ticket = false;
+    //bool auth_finished = false;
     bool auth_in_progress = false;
-    HAuthTicket hticket;
+    //HAuthTicket hticket;
 
     bool has_encrypted_ticket = false;
     std::vector<uint8_t> encrypted_app_ticket;
@@ -138,10 +138,10 @@ void steamapi::handle_auth()
 
 bool steamapi::auth_success()
 {
-    if(!secret_environment.auth_finished)
+    if(secret_environment.auth_in_progress)
         return false;
 
-    if(secret_environment.auth_finished && !secret_environment.has_ticket)
+    if(!secret_environment.has_encrypted_ticket)
         return false;
 
     return true;
