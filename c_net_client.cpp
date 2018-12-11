@@ -166,7 +166,7 @@ void handle_sending_auth(c_shared_data shared)
 
         steam_api_request_encrypted_token(csapi);
 
-        while(!steam_api_should_wait_for_encrypted_token(csapi)){}
+        while(steam_api_should_wait_for_encrypted_token(csapi)){}
 
         if(!steam_api_has_encrypted_token(csapi))
         {
