@@ -74,7 +74,6 @@ void callback_environment::OnRequestEncryptedAppTicket( EncryptedAppTicketRespon
 
     if ( pEncryptedAppTicketResponse->m_eResult == k_EResultOK )
 	{
-		//uint8 rgubTicket[1024];
 		uint32 cubTicket;
         encrypted_app_ticket.resize(1024);
 		SteamUser()->GetEncryptedAppTicket( &encrypted_app_ticket[0], 1024, &cubTicket );
