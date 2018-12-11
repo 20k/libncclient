@@ -149,6 +149,28 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
     printf("write\n");
 }
 
+std::string binary_to_hex(const std::string& in, bool swap_endianness = false)
+{
+    std::string ret;
+
+    const char* LUT = "0123456789ABCDEF";
+
+    for(auto& i : in)
+    {
+        int lower_bits = ((int)i) & 0xF;
+        int upper_bits = (((int)i) >> 4) & 0xF;
+
+        if(swap_endianness)
+        {
+            std::swap(lower_bits, upper_bits);
+        }
+
+        ret += std::string(1, LUT[lower_bits]) + std::string(1, LUT[upper_bits]);
+    }
+
+    return ret;
+}
+
 void handle_sending_auth(c_shared_data shared)
 {
     if(sd_has_key_auth(shared))
@@ -176,7 +198,11 @@ void handle_sending_auth(c_shared_data shared)
 
         sized_string str = steam_api_get_encrypted_token(csapi);
 
-        std::string to_send = "client_command auth_steam client_hex " + c_str_consume(str);
+        std::string etoken = c_str_consume(str);
+
+        etoken = binary_to_hex(etoken);
+
+        std::string to_send = "client_command auth_steam client_hex " + etoken;
 
         sd_add_back_write(shared, make_view(to_send));
     }
