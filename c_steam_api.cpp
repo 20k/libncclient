@@ -9,8 +9,12 @@
 #include <steamworks_sdk_142/sdk/public/steam/steam_api.h>
 #include <steamworks_sdk_142/sdk/public/steam/isteamuser.h>
 
+#include <mutex>
+
 struct callback_environment
 {
+    std::mutex lock;
+
     STEAM_CALLBACK( callback_environment, OnGameOverlayActivated, GameOverlayActivated_t );
     //STEAM_CALLBACK( callback_environment, OnAuthResponse, GetAuthSessionTicketResponse_t );
 
@@ -59,11 +63,15 @@ private:
 
 void callback_environment::OnGameOverlayActivated( GameOverlayActivated_t* pCallback )
 {
+    std::lock_guard guard(lock);
+
     overlay_open = pCallback->m_bActive;
 }
 
 void callback_environment::OnRequestEncryptedAppTicket( EncryptedAppTicketResponse_t *pEncryptedAppTicketResponse, bool bIOFailure )
 {
+    std::lock_guard guard(lock);
+
     if ( pEncryptedAppTicketResponse->m_eResult == k_EResultOK )
 	{
 		//uint8 rgubTicket[1024];
@@ -132,12 +140,16 @@ void steamapi::handle_auth()
     SteamAPICall_t scall = SteamUser()->RequestEncryptedAppTicket(nullptr, 0);
     //hauthticket = SteamUser()->GetAuthSessionTicket(&ticket[0], ticket.size(), &real_ticket_size);
 
+    std::lock_guard guard(secret_environment.lock);
     secret_environment.auth_in_progress = true;
     secret_environment.m_OnRequestEncryptedAppTicketCallResult.Set( scall, &secret_environment, &callback_environment::OnRequestEncryptedAppTicket );
 }
 
 bool steamapi::auth_success()
 {
+    std::lock_guard guard(secret_environment.lock);
+    printf("Inside function\n");
+
     if(secret_environment.auth_in_progress)
         return false;
 
@@ -155,16 +167,22 @@ steamapi::~steamapi()
 
 bool steamapi::is_overlay_open()
 {
+    std::lock_guard guard(secret_environment.lock);
+
     return secret_environment.overlay_open;
 }
 
 std::vector<uint8_t> steamapi::get_encrypted_token()
 {
+    std::lock_guard guard(secret_environment.lock);
+
     return secret_environment.encrypted_app_ticket;
 }
 
 bool steamapi::should_wait_for_encrypted_token()
 {
+    std::lock_guard guard(secret_environment.lock);
+
     return secret_environment.auth_in_progress;
 }
 
