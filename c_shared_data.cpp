@@ -38,7 +38,12 @@ struct shared_data
     {
         std::lock_guard<std::mutex> lk(ilock);
 
-        return use_steam_auth;
+        if(use_steam_auth)
+        {
+            return steam_api_enabled(csapi);
+        }
+
+        return false;
     }
 
     bool has_key_auth()

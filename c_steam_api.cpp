@@ -244,3 +244,8 @@ __declspec(dllexport) int steam_api_overlay_is_open(c_steam_api csapi)
 {
     return csapi->is_overlay_open();
 }
+
+__declspec(dllexport) int steam_api_enabled(c_steam_api csapi)
+{
+    return csapi->enabled;
+}
