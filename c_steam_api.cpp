@@ -134,7 +134,15 @@ void steamapi::handle_auth(const std::string& user_data)
     if(!enabled)
         return;
 
-    SteamAPICall_t scall = SteamUser()->RequestEncryptedAppTicket(nullptr, 0);
+    std::string lstr = user_data;
+
+    SteamAPICall_t scall;
+
+    if(lstr.size() > 0)
+        scall = SteamUser()->RequestEncryptedAppTicket(&lstr[0], lstr.size());
+    else
+        scall = SteamUser()->RequestEncryptedAppTicket(nullptr, 0);
+
     //hauthticket = SteamUser()->GetAuthSessionTicket(&ticket[0], ticket.size(), &real_ticket_size);
 
     std::lock_guard guard(secret_environment.lock);
