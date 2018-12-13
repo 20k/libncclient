@@ -49,7 +49,7 @@ struct steamapi
     steamapi();
     ~steamapi();
 
-    void handle_auth();
+    void handle_auth(const std::string& user_data);
     bool auth_success();
     void pump_callbacks();
     bool is_overlay_open();
@@ -129,7 +129,7 @@ void steamapi::pump_callbacks()
     SteamAPI_RunCallbacks();
 }
 
-void steamapi::handle_auth()
+void steamapi::handle_auth(const std::string& user_data)
 {
     if(!enabled)
         return;
@@ -196,9 +196,11 @@ __declspec(dllexport) void steam_api_destroy(c_steam_api csapi)
     delete csapi;
 }
 
-__declspec(dllexport) void steam_api_request_encrypted_token(c_steam_api csapi)
+__declspec(dllexport) void steam_api_request_encrypted_token(c_steam_api csapi, sized_view user_data)
 {
-    csapi->handle_auth();
+    std::string str = c_str_sized_to_cpp(user_data);
+
+    csapi->handle_auth(str);
 }
 
 __declspec(dllexport) int steam_api_should_wait_for_encrypted_token(c_steam_api csapi)

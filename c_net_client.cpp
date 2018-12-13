@@ -171,22 +171,31 @@ std::string binary_to_hex(const std::string& in, bool swap_endianness = false)
     return ret;
 }
 
+///ok so lets redo this
+///if we have key auth, encrypt it as part of the session token
+///if we don't, just send the encrypted session token
+///on the server, if we have key.key then use that for auth even if we get steam auth
+///if we have steam auth but no key.key use steam auth
+///if we have only key.key use just that for auth and error if we try to tie
 void handle_sending_auth(c_shared_data shared)
 {
-    if(sd_has_key_auth(shared))
-    {
-        sized_string auth = sd_get_auth(shared);
-        std::string auth_str = "client_command auth client " + c_str_sized_to_cpp(auth);
-        free_sized_string(auth);
-
-        sd_add_back_write(shared, make_view(auth_str));
-    }
-    else if(sd_use_steam_auth(shared))
+    if(sd_use_steam_auth(shared))
     {
         ///steam
         c_steam_api csapi = sd_get_steam_auth(shared);
 
-        steam_api_request_encrypted_token(csapi);
+        if(sd_has_key_auth(shared))
+        {
+            sized_string auth = sd_get_auth(shared);
+
+            steam_api_request_encrypted_token(csapi, make_view(auth));
+
+            free_sized_string(auth);
+        }
+        else
+        {
+            steam_api_request_encrypted_token(csapi, make_view_from_raw(""));
+        }
 
         while(steam_api_should_wait_for_encrypted_token(csapi)){}
 
@@ -205,6 +214,14 @@ void handle_sending_auth(c_shared_data shared)
         std::string to_send = "client_command auth_steam client_hex " + etoken;
 
         sd_add_back_write(shared, make_view(to_send));
+    }
+    else if(sd_has_key_auth(shared))
+    {
+        sized_string auth = sd_get_auth(shared);
+        std::string auth_str = "client_command auth client " + c_str_sized_to_cpp(auth);
+        free_sized_string(auth);
+
+        sd_add_back_write(shared, make_view(auth_str));
     }
 }
 

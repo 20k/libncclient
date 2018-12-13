@@ -15,7 +15,7 @@ extern "C"
     __declspec(dllexport) c_steam_api steam_api_alloc();
     __declspec(dllexport) void steam_api_destroy(c_steam_api csapi);
 
-    __declspec(dllexport) void steam_api_request_encrypted_token(c_steam_api csapi);
+    __declspec(dllexport) void steam_api_request_encrypted_token(c_steam_api csapi, sized_view user_data);
     __declspec(dllexport) int steam_api_has_encrypted_token(c_steam_api csapi);
     __declspec(dllexport) int steam_api_should_wait_for_encrypted_token(c_steam_api csapi);
     __declspec(dllexport) sized_string steam_api_get_encrypted_token(c_steam_api csapi);
