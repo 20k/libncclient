@@ -88,6 +88,17 @@ void callback_environment::OnRequestEncryptedAppTicket( EncryptedAppTicketRespon
     else if ( pEncryptedAppTicketResponse->m_eResult == k_EResultLimitExceeded )
 	{
 		printf("Hit rate limit (1/min)\n");
+
+        uint32 cubTicket;
+        encrypted_app_ticket.resize(1024);
+		SteamUser()->GetEncryptedAppTicket( &encrypted_app_ticket[0], 1024, &cubTicket );
+
+		encrypted_app_ticket.resize(cubTicket);
+
+		has_encrypted_ticket = true;
+		auth_in_progress = false;
+
+		return;
 	}
 	else if ( pEncryptedAppTicketResponse->m_eResult == k_EResultDuplicateRequest )
 	{
