@@ -311,10 +311,10 @@ void handle_async_read(c_shared_data shared, shared_context& ctx)
 
 void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host_ip, const std::string& host_port)
 {
-    if(sd_use_steam_auth(shared))
+    /*if(sd_use_steam_auth(shared))
     {
         printf("Using Steam Auth\n");
-    }
+    }*/
 
     while(1)
     {
