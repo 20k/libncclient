@@ -22,6 +22,7 @@ extern "C"
 
     __declspec(dllexport) void steam_api_pump_events(c_steam_api csapi);
     __declspec(dllexport) int steam_api_overlay_is_open(c_steam_api csapi);
+    __declspec(dllexport) int steam_api_overlay_needs_present(c_steam_api csapi);
 
     __declspec(dllexport) int steam_api_enabled(c_steam_api csapi);
 
