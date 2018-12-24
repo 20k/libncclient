@@ -258,7 +258,12 @@ __declspec(dllexport) int steam_api_overlay_is_open(c_steam_api csapi)
 
 __declspec(dllexport) int steam_api_overlay_needs_present(c_steam_api csapi)
 {
-    return SteamUtils()->BOverlayNeedsPresent();
+    ISteamUtils* isutil = SteamUtils();
+
+    if(isutil == nullptr)
+        return 0;
+
+    return isutil->BOverlayNeedsPresent();
 }
 
 __declspec(dllexport) int steam_api_enabled(c_steam_api csapi)
