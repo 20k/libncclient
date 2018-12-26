@@ -163,6 +163,9 @@ void steamapi::handle_auth(const std::string& user_data)
 
 bool steamapi::auth_success()
 {
+    if(!enabled)
+        return false;
+
     std::lock_guard guard(secret_environment.lock);
     printf("Inside function\n");
 
@@ -183,6 +186,9 @@ steamapi::~steamapi()
 
 bool steamapi::is_overlay_open()
 {
+    if(!enabled)
+        return false;
+
     std::lock_guard guard(secret_environment.lock);
 
     return secret_environment.overlay_open;
@@ -258,6 +264,9 @@ __declspec(dllexport) int steam_api_overlay_is_open(c_steam_api csapi)
 
 __declspec(dllexport) int steam_api_overlay_needs_present(c_steam_api csapi)
 {
+    if(!csapi->enabled)
+        return 0;
+
     ISteamUtils* isutil = SteamUtils();
 
     if(isutil == nullptr)
