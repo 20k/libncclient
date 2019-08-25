@@ -9,8 +9,12 @@
 #include <steamworks_sdk_142/sdk/public/steam/steam_api.h>
 #include <steamworks_sdk_142/sdk/public/steam/isteamuser.h>
 
+#include <mutex>
+
 struct callback_environment
 {
+    std::mutex lock;
+
     STEAM_CALLBACK( callback_environment, OnGameOverlayActivated, GameOverlayActivated_t );
     //STEAM_CALLBACK( callback_environment, OnAuthResponse, GetAuthSessionTicketResponse_t );
 
@@ -21,10 +25,10 @@ struct callback_environment
 
     bool overlay_open = false;
 
-    bool has_ticket = false;
-    bool auth_finished = false;
+    //bool has_ticket = false;
+    //bool auth_finished = false;
     bool auth_in_progress = false;
-    HAuthTicket hticket;
+    //HAuthTicket hticket;
 
     bool has_encrypted_ticket = false;
     std::vector<uint8_t> encrypted_app_ticket;
@@ -45,7 +49,7 @@ struct steamapi
     steamapi();
     ~steamapi();
 
-    void handle_auth();
+    void handle_auth(const std::string& user_data);
     bool auth_success();
     void pump_callbacks();
     bool is_overlay_open();
@@ -59,21 +63,22 @@ private:
 
 void callback_environment::OnGameOverlayActivated( GameOverlayActivated_t* pCallback )
 {
+    std::lock_guard guard(lock);
+
     overlay_open = pCallback->m_bActive;
 }
 
 void callback_environment::OnRequestEncryptedAppTicket( EncryptedAppTicketResponse_t *pEncryptedAppTicketResponse, bool bIOFailure )
 {
+    std::lock_guard guard(lock);
+
     if ( pEncryptedAppTicketResponse->m_eResult == k_EResultOK )
 	{
-		//uint8 rgubTicket[1024];
 		uint32 cubTicket;
         encrypted_app_ticket.resize(1024);
 		SteamUser()->GetEncryptedAppTicket( &encrypted_app_ticket[0], 1024, &cubTicket );
 
 		encrypted_app_ticket.resize(cubTicket);
-
-		std::cout << "successfully got encrypted auth ticket of length " << encrypted_app_ticket.size() << std::endl;
 
 		has_encrypted_ticket = true;
 		auth_in_progress = false;
@@ -83,6 +88,17 @@ void callback_environment::OnRequestEncryptedAppTicket( EncryptedAppTicketRespon
     else if ( pEncryptedAppTicketResponse->m_eResult == k_EResultLimitExceeded )
 	{
 		printf("Hit rate limit (1/min)\n");
+
+        uint32 cubTicket;
+        encrypted_app_ticket.resize(1024);
+		SteamUser()->GetEncryptedAppTicket( &encrypted_app_ticket[0], 1024, &cubTicket );
+
+		encrypted_app_ticket.resize(cubTicket);
+
+		has_encrypted_ticket = true;
+		auth_in_progress = false;
+
+		return;
 	}
 	else if ( pEncryptedAppTicketResponse->m_eResult == k_EResultDuplicateRequest )
 	{
@@ -124,24 +140,39 @@ void steamapi::pump_callbacks()
     SteamAPI_RunCallbacks();
 }
 
-void steamapi::handle_auth()
+void steamapi::handle_auth(const std::string& user_data)
 {
     if(!enabled)
         return;
 
-    SteamAPICall_t scall = SteamUser()->RequestEncryptedAppTicket(nullptr, 0);
+    std::string lstr = user_data;
+
+    SteamAPICall_t scall;
+
+    if(lstr.size() > 0)
+        scall = SteamUser()->RequestEncryptedAppTicket(&lstr[0], lstr.size());
+    else
+        scall = SteamUser()->RequestEncryptedAppTicket(nullptr, 0);
+
     //hauthticket = SteamUser()->GetAuthSessionTicket(&ticket[0], ticket.size(), &real_ticket_size);
 
+    std::lock_guard guard(secret_environment.lock);
     secret_environment.auth_in_progress = true;
     secret_environment.m_OnRequestEncryptedAppTicketCallResult.Set( scall, &secret_environment, &callback_environment::OnRequestEncryptedAppTicket );
 }
 
 bool steamapi::auth_success()
 {
-    if(!secret_environment.auth_finished)
+    if(!enabled)
         return false;
 
-    if(secret_environment.auth_finished && !secret_environment.has_ticket)
+    std::lock_guard guard(secret_environment.lock);
+    printf("Inside function\n");
+
+    if(secret_environment.auth_in_progress)
+        return false;
+
+    if(!secret_environment.has_encrypted_ticket)
         return false;
 
     return true;
@@ -155,16 +186,25 @@ steamapi::~steamapi()
 
 bool steamapi::is_overlay_open()
 {
+    if(!enabled)
+        return false;
+
+    std::lock_guard guard(secret_environment.lock);
+
     return secret_environment.overlay_open;
 }
 
 std::vector<uint8_t> steamapi::get_encrypted_token()
 {
+    std::lock_guard guard(secret_environment.lock);
+
     return secret_environment.encrypted_app_ticket;
 }
 
 bool steamapi::should_wait_for_encrypted_token()
 {
+    std::lock_guard guard(secret_environment.lock);
+
     return secret_environment.auth_in_progress;
 }
 
@@ -181,9 +221,11 @@ __declspec(dllexport) void steam_api_destroy(c_steam_api csapi)
     delete csapi;
 }
 
-__declspec(dllexport) void steam_api_request_encrypted_token(c_steam_api csapi)
+__declspec(dllexport) void steam_api_request_encrypted_token(c_steam_api csapi, sized_view user_data)
 {
-    csapi->handle_auth();
+    std::string str = c_str_sized_to_cpp(user_data);
+
+    csapi->handle_auth(str);
 }
 
 __declspec(dllexport) int steam_api_should_wait_for_encrypted_token(c_steam_api csapi)
@@ -218,4 +260,22 @@ __declspec(dllexport) void steam_api_pump_events(c_steam_api csapi)
 __declspec(dllexport) int steam_api_overlay_is_open(c_steam_api csapi)
 {
     return csapi->is_overlay_open();
+}
+
+__declspec(dllexport) int steam_api_overlay_needs_present(c_steam_api csapi)
+{
+    if(!csapi->enabled)
+        return 0;
+
+    ISteamUtils* isutil = SteamUtils();
+
+    if(isutil == nullptr)
+        return 0;
+
+    return isutil->BOverlayNeedsPresent();
+}
+
+__declspec(dllexport) int steam_api_enabled(c_steam_api csapi)
+{
+    return csapi->enabled;
 }

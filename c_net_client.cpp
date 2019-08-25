@@ -149,24 +149,55 @@ void handle_async_write(c_shared_data shared, shared_context& ctx)
     printf("write\n");
 }
 
+std::string binary_to_hex(const std::string& in, bool swap_endianness = false)
+{
+    std::string ret;
+
+    const char* LUT = "0123456789ABCDEF";
+
+    for(auto& i : in)
+    {
+        int lower_bits = ((int)i) & 0xF;
+        int upper_bits = (((int)i) >> 4) & 0xF;
+
+        if(swap_endianness)
+        {
+            std::swap(lower_bits, upper_bits);
+        }
+
+        ret += std::string(1, LUT[lower_bits]) + std::string(1, LUT[upper_bits]);
+    }
+
+    return ret;
+}
+
+///ok so lets redo this
+///if we have key auth, encrypt it as part of the session token
+///if we don't, just send the encrypted session token
+///on the server, if we have key.key then use that for auth even if we get steam auth
+///if we have steam auth but no key.key use steam auth
+///if we have only key.key use just that for auth and error if we try to tie
 void handle_sending_auth(c_shared_data shared)
 {
-    if(sd_has_key_auth(shared))
-    {
-        sized_string auth = sd_get_auth(shared);
-        std::string auth_str = "client_command auth client " + c_str_sized_to_cpp(auth);
-        free_sized_string(auth);
-
-        sd_add_back_write(shared, make_view(auth_str));
-    }
-    else if(sd_use_steam_auth(shared))
+    if(sd_use_steam_auth(shared))
     {
         ///steam
         c_steam_api csapi = sd_get_steam_auth(shared);
 
-        steam_api_request_encrypted_token(csapi);
+        if(sd_has_key_auth(shared))
+        {
+            sized_string auth = sd_get_auth(shared);
 
-        while(!steam_api_should_wait_for_encrypted_token(csapi)){}
+            steam_api_request_encrypted_token(csapi, make_view(auth));
+
+            free_sized_string(auth);
+        }
+        else
+        {
+            steam_api_request_encrypted_token(csapi, make_view_from_raw(""));
+        }
+
+        while(steam_api_should_wait_for_encrypted_token(csapi)){}
 
         if(!steam_api_has_encrypted_token(csapi))
         {
@@ -176,9 +207,21 @@ void handle_sending_auth(c_shared_data shared)
 
         sized_string str = steam_api_get_encrypted_token(csapi);
 
-        std::string to_send = "client_command auth_steam client_hex " + c_str_consume(str);
+        std::string etoken = c_str_consume(str);
+
+        etoken = binary_to_hex(etoken);
+
+        std::string to_send = "client_command auth_steam client_hex " + etoken;
 
         sd_add_back_write(shared, make_view(to_send));
+    }
+    else if(sd_has_key_auth(shared))
+    {
+        sized_string auth = sd_get_auth(shared);
+        std::string auth_str = "client_command auth client " + c_str_sized_to_cpp(auth);
+        free_sized_string(auth);
+
+        sd_add_back_write(shared, make_view(auth_str));
     }
 }
 
@@ -268,10 +311,10 @@ void handle_async_read(c_shared_data shared, shared_context& ctx)
 
 void watchdog(c_shared_data shared, shared_context& ctx, const std::string& host_ip, const std::string& host_port)
 {
-    if(sd_use_steam_auth(shared))
+    /*if(sd_use_steam_auth(shared))
     {
         printf("Using Steam Auth\n");
-    }
+    }*/
 
     while(1)
     {
