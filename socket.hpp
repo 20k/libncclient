@@ -11,6 +11,7 @@
 #include "nc_util.hpp"
 #include <mutex>
 #include <SFML/System.hpp>
+#include <iostream>
 
 #ifdef SERVER
 #include "../../logging.hpp"
@@ -231,10 +232,7 @@ struct websock_socket : socket_interface
     {
         std::lock_guard guard(mut);
 
-        std::ostringstream os;
-        os << boost::beast::buffers(mbuffer.data());
-
-        return os.str();
+        return boost::beast::buffers_to_string(mbuffer.data());
     }
 
     virtual bool write(const std::string& msg) override
@@ -386,10 +384,7 @@ struct websock_socket_ssl : socket_interface
     {
         std::lock_guard guard(mut);
 
-        std::ostringstream os;
-        os << boost::beast::buffers(mbuffer.data());
-
-        return os.str();
+        return boost::beast::buffers_to_string(mbuffer.data());
     }
 
     virtual bool write(const std::string& msg) override
