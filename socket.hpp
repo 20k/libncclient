@@ -11,6 +11,7 @@
 #include "nc_util.hpp"
 #include <mutex>
 #include <SFML/System.hpp>
+#include <iostream>
 
 #ifdef SERVER
 #include "../../logging.hpp"
