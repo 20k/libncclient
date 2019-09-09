@@ -93,7 +93,12 @@ void atomic_write_all(const std::string& file, const T& data)
 
     do
     {
+        #ifdef __WIN32__
         bool err = ReplaceFileA(file.c_str(), atomic_file.c_str(), backup_file.c_str(), REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr) == 0;
+        #else
+        bool err = rename(atomic_file.c_str(), file.c_str()) != 0;
+        #endif // __WIN32__
+
         //bool err = ReplaceFileA(file.c_str(), atomic_file.c_str(), nullptr, REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr) == 0;
 
         if(!err)
