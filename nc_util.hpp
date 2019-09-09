@@ -9,8 +9,10 @@
 #include <cmath>
 #include <SFML/Graphics.hpp>
 
+#ifdef __WIN32__
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#endif // __WIN32__
 
 inline
 std::string read_file(const std::string& file)
@@ -109,7 +111,12 @@ void atomic_write_all(const std::string& file, const T& data)
 
         if(err)
         {
+            #ifdef __WIN32__
             printf("atomic write error %lu ", GetLastError());
+            #else
+            printf("atomic write error %i\n", errno);
+            #endif // __WIN32__
+
             any_errors = true;
         }
     }
