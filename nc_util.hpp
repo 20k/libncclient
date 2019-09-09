@@ -114,7 +114,7 @@ void atomic_write_all(const std::string& file, const T& data)
             #ifdef __WIN32__
             printf("atomic write error %lu ", GetLastError());
             #else
-            printf("atomic write error %i\n", errno);
+            printf("atomic write error %i %s\n", errno, file.c_str());
             #endif // __WIN32__
 
             any_errors = true;
