@@ -7,11 +7,17 @@
 #include <fstream>
 #include <algorithm>
 #include <cmath>
-#include <SFML/Graphics.hpp>
+
+#include <SFML/System/Clock.hpp>
 
 #ifdef __WIN32__
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#else
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #endif // __WIN32__
 
 inline
@@ -72,15 +78,39 @@ void atomic_write_all(const std::string& file, const T& data)
     std::string atomic_file = file + atomic_extension;
     std::string backup_file = file + ".back";
 
-    auto my_file = std::fstream(atomic_file, std::ios::out | std::ios::binary);
+    #ifdef __WIN32__
+    HANDLE handle = CreateFile(atomic_file.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    WriteFile(handle, &data[0], data.size(), nullptr, nullptr);
+    FlushFileBuffers(handle);
+    CloseHandle(handle);
+    #else
+    int fd = open(atomic_file.c_str(), O_CREAT | O_DIRECT | O_SYNC | O_TRUNC | O_WRONLY, 0777);
+
+    int written = 0;
+
+    while(written < data.size())
+    {
+        int rval = write(fd, &data[written], (int)data.size() - written);
+
+        if(rval == -1)
+        {
+            close(fd);
+            throw std::runtime_error("Errno in atomic write " + std::to_string(errno));
+        }
+
+        written += rval;
+    }
+
+    close(fd);
+
+    #endif // __WIN32__
+
+    /*auto my_file = std::fstream(atomic_file, std::ios::out | std::ios::binary);
 
     my_file.write((const char*)&data[0], data.size());
     my_file.close();
 
-    /*HANDLE handle = CreateFile(atomic_file.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
-    WriteFile(handle, &data[0], data.size(), nullptr, nullptr);
-    FlushFileBuffers(handle);
-    CloseHandle(handle);*/
+    */
 
     if(!file_exists(file))
     {
