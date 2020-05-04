@@ -84,18 +84,20 @@ void atomic_write_all(const std::string& file, const T& data)
     FlushFileBuffers(handle);
     CloseHandle(handle);
     #else
-    int fd = open(atomic_file.c_str(), O_CREAT | O_DIRECT | O_SYNC | O_TRUNC | O_WRONLY, 0777);
+    int fd = open(atomic_file.c_str(), O_CREAT | O_SYNC | O_TRUNC | O_WRONLY, 0777);
 
     int written = 0;
 
     while(written < data.size())
     {
-        int rval = write(fd, &data[written], (int)data.size() - written);
+        int count = (int)data.size() - written;
+
+        int rval = write(fd, &data[written], count);
 
         if(rval == -1)
         {
             close(fd);
-            throw std::runtime_error("Errno in atomic write " + std::to_string(errno));
+            throw std::runtime_error("Errno in atomic write " + std::to_string(errno) + " " + file + " S: " + std::to_string(count));
         }
 
         written += rval;
