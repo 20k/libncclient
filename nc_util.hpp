@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <cmath>
 
-#include <SFML/System/Clock.hpp>
+#include <toolkit/clock.hpp>
 
 #ifdef __WIN32__
 #define WIN32_LEAN_AND_MEAN
@@ -120,7 +120,7 @@ void atomic_write_all(const std::string& file, const T& data)
         return;
     }
 
-    sf::Clock clk;
+    steady_timer timer;
 
     bool write_success = false;
     bool any_errors = false;
@@ -152,7 +152,7 @@ void atomic_write_all(const std::string& file, const T& data)
             any_errors = true;
         }
     }
-    while(clk.getElapsedTime().asMilliseconds() < 1000);
+    while(timer.get_elapsed_time_s() < 1);
 
     if(!write_success)
     {
